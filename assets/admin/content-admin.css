@@ -1,0 +1,65 @@
+
+/* content-admin.css */
+
+.breadcrumb {
+    margin-bottom: 2px;
+}
+
+/*??
+.content-index {
+    overflow: auto;
+    min-height: 100%;
+}
+.content-tree-container {
+    overflow: auto;
+}
+*/
+
+.content-tree {
+    overflow: auto;
+    height: 600px; /* ?? how to auto */
+}
+.content-tree-link:hover {
+    background-color: lightgrey;
+}
+.content-tree-link:hover a {
+    font-weight: bold;
+    text-decoration: none;
+}
+.content-tree-empty {
+    font-weight: bold;
+    text-align: center;
+    padding-top: 50px;
+}
+
+.content-multilang {
+    margin-top: 5px;
+}
+
+.active .tab-field {
+    font-weight: bold;
+    background-color: lightgrey;
+}
+
+.tab-field {
+    margin: 1px;
+    height: 22px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #EEE;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    /*border: solid 1px black;/**/
+}
+
+.tab-field .tab-link a {
+    text-decoration: none;
+}
+
+.wrap > .container {
+    padding-top: 5px;
+}
+
+.navbar {
+    margin-bottom: 5px;
+}

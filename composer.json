@@ -1,0 +1,23 @@
+{
+    "name": "asbsoft/yii2module-content_2_170309",
+    "description": "Simple Yii2 content module",
+    "keywords": ["yii2"],
+    "type": "yii2-module",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Alexandr Belogolovsky",
+            "email": "ab2014box@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "yiisoft/yii2": "~2.0.10",
+        "asbsoft/yii2-common_2_170212": "~2.03",
+    },
+    "autoload": {
+        "psr-4": {
+            "asb\\modules\\content_2_170309\\": ""
+        }
+    }
+}
