@@ -225,7 +225,6 @@ class ContentBase extends DataModel
         $result = parent::load($data, $formName);//var_dump($result);var_dump($this->attributes);
         if ($result) {
             $i18nFormName = $this->module->model(static::I18N_JOIN_MODEL)->formName();
-//var_dump($this->id);var_dump($this->i18n);exit;
             foreach ($this->languages as $langCode => $lang) {
                 if (!empty($data[$i18nFormName][$langCode])) {
                     $i18nResult = $this->i18n[$langCode]->load($data[$i18nFormName][$langCode], '');//var_dump($i18nResult);var_dump($this->i18n[$langCode]->attributes);

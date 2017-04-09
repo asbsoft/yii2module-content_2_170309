@@ -233,6 +233,26 @@ class Content extends ContentBase
         return $contentId;
     }
 
+    /**
+     * Get path to node in content tree.
+     * @param static $node
+     * @return string
+     */
+    public static function getNodePath($node)
+    {//echo __METHOD__."($node->id)<br>";
+        $result = '';
+        if ($node instanceof static) {//var_dump($node->attributes);
+            $result = $node->slug;
+            if (!empty($node->parend_id)) {
+                $parent = static::node($node->parend_id);
+                if (!empty($parent)) {
+                    $result = static::getNodePath($parent) . '/' . $result;
+                }
+            }
+        }//var_dump($result);
+        return $result;
+    }
+    
     protected static $_language;
     /**
      * Get normalized system language.

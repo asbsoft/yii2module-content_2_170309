@@ -47,6 +47,7 @@ class ContentUrlRule extends YiiWebUrlRule implements UniUrlRuleInterface
      * @inheritdoc
      * There are manu rules with same route (action unique id '.../main/view') but with different $this->contentId.
      * System find first, but need to pass processing to proper rule.
+     * @return string|false the created URL, or false if this rule cannot be used for creating this URL.
      */
     public function createUrl($manager, $route, $params)
     {//echo __METHOD__."(mgr,'$route')";var_dump($params);echo"pattern:{$this->pattern},contId:{$this->contentId}<br>";
@@ -55,7 +56,8 @@ class ContentUrlRule extends YiiWebUrlRule implements UniUrlRuleInterface
 
         if (empty($params['id'])) $params['id'] = 0; // root is default
 
-        $rule = $this;
+        //$rule = $this;
+        $rule = null;
         // find proper rule with contentId == $params['id']:
         foreach ($manager->rules as $nextRule) {
             if (!empty($nextRule->route) && $nextRule->route == $route && $nextRule->contentId == $params['id']) {
@@ -63,6 +65,8 @@ class ContentUrlRule extends YiiWebUrlRule implements UniUrlRuleInterface
                 break;
             }
         }//echo"FOUND:pattern:{$rule->pattern},contId:{$rule->contentId},lang:{$lang}<br>";
+
+        if (empty($rule)) return false; // if not found proper
 
         $node = Content::node($rule->contentId);
         if (empty($node->i18n[$lang]->text)) {

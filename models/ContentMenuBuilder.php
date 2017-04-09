@@ -3,6 +3,7 @@
 namespace asb\yii2\modules\content_2_170309\models;
 
 use asb\yii2\modules\content_2_170309\Module;
+use asb\yii2\common_2_170212\web\RoutesBuilder;
 
 use Yii;
 use yii\helpers\Url;
@@ -21,7 +22,6 @@ class ContentMenuBuilder
     public static function rootMenuItems()
     {
         $menuItems = static::menuItems(0);//echo __METHOD__;var_dump($menuItems);exit;
-//echo __METHOD__;var_dump($menuItems[1]['items'][0]);
         return $menuItems;
     }
 
@@ -42,11 +42,16 @@ class ContentMenuBuilder
 
         $node = static::$_model->node($parentId);
         if (!empty($node->i18n[$lang]->title) && $node->is_visible) {
-            $parentMenuItem = [
-                'label' => $node->i18n[$lang]->title,
-                //'url' => Url::toRoute([static::$_routeAction, 'id' => $node->id]),
-                'url' => static::createLink($node->id),
-            ];//echo"URL#{$node->id}: {$parentMenuItem['url']}<br>";
+            $url = static::createContentLink($node->id); // may be false if node has no text but only menu item title
+            if ($url === false) {
+                $url = static::checkRoutesLink($node);//echo'found@routes:';var_dump($url);
+            }
+            if ($url) {
+                $parentMenuItem = [
+                    'label' => $node->i18n[$lang]->title,
+                    'url' => $url,
+                ];//echo"URL#{$node->id}: {$parentMenuItem['url']}<br>";
+            }
         }
 
         $children = static::$_model->nodeChildren($parentId);
@@ -56,41 +61,67 @@ class ContentMenuBuilder
                 $tmpItems = static::menuItems($child->id);
                 if (!empty($tmpItems)) $submenuItems[] = $tmpItems;
             }
-        }
+        }//echo __METHOD__."($parentId): submenuItems:";var_dump($submenuItems);
         
         if (empty($parentMenuItem)) {
             $menuItems = $submenuItems;
         } else if (empty($submenuItems)) {
-            if (!empty($node->i18n[$lang]->text)) $menuItems = $parentMenuItem;
-        } else {
-            if (!empty($node->i18n[$lang]->text)) array_unshift($submenuItems, $parentMenuItem);
+            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node)) {
+                $menuItems = $parentMenuItem;
+            }
+        } else { // duplicate parent link in submenu
+            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node)) {
+                array_unshift($submenuItems, $parentMenuItem);
+            }
             $menuItems = [
                 'label' => $parentMenuItem['label'],
                 'items' => $submenuItems,
                 'dropDownOptions' => ['class' => 'dropdown-menu'], //!! v.2.0.10
             ];
-        }//echo __METHOD__."($parentId)";var_dump($menuItems);
+        }//echo __METHOD__."($parentId): menuItems:";var_dump($menuItems);
 
         return $menuItems;
     }
 
-    public static function createLink($id)
+    /**
+     * For node without 'text' check if exists such route for any another module.
+     * If such route exists will return link for menu.
+     * @param Content $node
+     * @return string|false
+     */
+    protected static function checkRoutesLink($node)
+    {//echo __METHOD__;var_dump($node->id);
+        $nodeLink = static::$_model->getNodePath($node);//var_dump($nodeLink);
+
+        // find route 
+        $result = false;
+        foreach (Yii::$app->urlManager->rules as $nextRule) {
+            if (RoutesBuilder::properRule($nextRule, $nodeLink)) {
+                $result = true;
+                break;
+            }
+        }
+        if ($result) {
+            $lh = static::langHelperClass();
+            $lang = $lh::getLangCode2(static::language());
+            $result = '/' . $lang . '/' . $nodeLink;
+        }//var_dump($result);exit;
+        return $result;
+    }
+
+    /**
+     * Create link for node.
+     * @param integer $id
+     * @return string|false
+     */
+    protected static function createContentLink($id)
     {
         $url = Url::toRoute([static::$_routeAction, 'id' => $id]);//var_dump($url);
         $parts = parse_url($url);//var_dump($parts);
-        if (!empty($parts['path']))
-        {
+        if (!empty($parts['path'])) {
             $url = $parts['path'];
-            if (!empty($parts['query'])) {
-                $params = explode('&', $parts['query']);//var_dump($params);
-                $query = '';
-                foreach ($params as $param) {
-                    $result = preg_replace('|(id=\d+)|', '', $param);
-                    if (empty($result)) continue;
-                    $query .= $result . '&';
-                }
-                $query = trim($query, '&');//var_dump($query);
-                if (!empty($query)) $url .= '?' . $query;
+            if (strstr($url, static::$_routeAction)) { // it's fake link contain action UID and GET-parameter "id={$id}"
+                $url = false;
             }
         }//var_dump($url);//exit;
         return $url;
@@ -115,6 +146,15 @@ class ContentMenuBuilder
         }
     }
 
+    protected static $_langHelper;
+    public static function langHelperClass()
+    {
+        if (empty(static::$_langHelper)) {
+            $module = Module::getModuleByClassname(Module::className());
+            static::$_langHelper = $module->langHelper;
+        }
+        return static::$_langHelper;
+    }
     protected static $_language;
     /**
      * Get normalized system language.
@@ -122,8 +162,7 @@ class ContentMenuBuilder
     public static function language()
     {
         if (empty(static::$_language)) {
-            $module = Module::getModuleByClassname(Module::className());
-            $langHelper = $module->langHelper;
+            $langHelper = static::langHelperClass();
             static::$_language = $langHelper::normalizeLangCode(Yii::$app->language);
         }
         return static::$_language;
