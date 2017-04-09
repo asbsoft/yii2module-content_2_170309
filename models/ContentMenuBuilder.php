@@ -46,12 +46,10 @@ class ContentMenuBuilder
             if ($url === false) {
                 $url = static::checkRoutesLink($node);//echo'found@routes:';var_dump($url);
             }
-            if ($url) {
-                $parentMenuItem = [
-                    'label' => $node->i18n[$lang]->title,
-                    'url' => $url,
-                ];//echo"URL#{$node->id}: {$parentMenuItem['url']}<br>";
-            }
+            $parentMenuItem = [
+                'label' => $node->i18n[$lang]->title,
+                'url' => $url,
+            ];//echo"parentMenuItem:#{$node->id}:url='$url'<br>";
         }
 
         $children = static::$_model->nodeChildren($parentId);
