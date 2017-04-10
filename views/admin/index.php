@@ -87,7 +87,7 @@
     </div>
 
     <div class="col-md-8">
-        <div class="col-xs-7">
+        <div class="col-xs-6">
             <h4>
                 <?php if ($parentId == '-'): ?>
                     <?= Yii::t($tc, 'All nodes') ?>
@@ -141,11 +141,11 @@
                 }
             ?>
         </div>
-        <div class="col-xs-2 text-right media-bottom">
+        <div class="col-xs-3 text-right media-bottom">
           <?php if(Yii::$app->user->can('roleContentAuthor')): ?>
             <?= Html::a(Yii::t($tc, 'Create Content'), ['create', 'parent' => $parentId], ['class' => 'btn btn-success']) ?>
           <?php elseif(Yii::$app->user->can('roleContentModerator')): ?>
-            <?= Yii::t($this->context->tcModule, "Moderator can't create news") ?>
+            <span class="small"><?= Yii::t($this->context->tcModule, "Moderator can't create articles") ?></span>
           <?php endif; ?>
         </div>
 
@@ -291,6 +291,7 @@
 </div>
 
 <?php
+    Yii::$app->i18n->translations[$tc]->forceTranslation = true;
     Modal::begin([
         'id' => 'instruction-window',
         'header' => '<h2 class="text-center">' . Yii::t($tc, 'Instruction') . '</h2>',

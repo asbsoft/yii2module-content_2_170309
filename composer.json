@@ -15,6 +15,12 @@
         "yiisoft/yii2": "~2.0.10",
         "asbsoft/yii2-common_2_170212": "~2.04",
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/asbsoft/yii2-common_2_170212"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "asb\\modules\\content_2_170309\\": ""

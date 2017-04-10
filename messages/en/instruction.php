@@ -3,7 +3,7 @@
 return [
     'Instruction' => '',
     'INSTRUCTION_TEXT' => <<<EOT
-<p>...</p>
+<p>... to do ...</p>
 <p>...</p>
 <p>...</p>
 EOT

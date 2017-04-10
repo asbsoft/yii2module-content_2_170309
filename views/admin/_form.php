@@ -12,6 +12,7 @@
 
     use yii\helpers\Html;
     use yii\widgets\ActiveForm;
+    use yii\bootstrap\Modal;
 
 
     $assetsFlag = FlagAsset::register($this);
@@ -82,6 +83,15 @@
         <div class="col-md-5">
             <?= $form->field($model, 'slug')->textInput(['maxlength' => true]) ?>
         </div>
+
+        <div class="col-md-2 text-right">
+            <?= Html::button('?', [
+                   'id' => 'show-instruction',
+                   'class' => 'btn',
+                   'title' => Yii::t($tc, 'Instruction'),
+                ]) ?>
+        </div>
+
 
         <br style="clear:both" />
 
@@ -184,10 +194,23 @@
 </div>
 
 <?php
+    Yii::$app->i18n->translations[$tc]->forceTranslation = true;
+    Modal::begin([
+        'id' => 'instruction-window',
+        'header' => '<h2 class="text-center">' . Yii::t($tc, 'Instruction') . '</h2>',
+    ]);
+        echo Yii::t($tc, 'INSTRUCTION_TEXT');
+    Modal::end();
+?>
+
+<?php
     $aftersave_list = $model::AFTERSAVE_LIST;
     $this->registerJs("
         jQuery('#save-no-view').bind('click', function() {
             jQuery('#aftersave').val('{$aftersave_list}');
+        });
+        jQuery('#show-instruction').bind('click', function() {
+            jQuery('#instruction-window').modal('show');
         });
     ");
 ?>

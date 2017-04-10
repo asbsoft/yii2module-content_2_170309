@@ -57,6 +57,8 @@ return array_merge($instruction, [
     'Work with this node'=>'Работать с этим узлом',
     '[no title]'        => '[без заголовка]',
     'Tree is empty'     => 'Дерево пусто',
+    "Moderator can't create articles"
+                        => 'Модератор не может создавать статьи',
 
 // models
     'ID'                => 'Ид',
