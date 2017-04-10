@@ -42,8 +42,10 @@ return [
 <b>{{created}}</b> и <b>{{updated}}</b> даты создания и последнего обновления в ANSI-формате.
 </p>
 <p>Поддерживаются плагины в виде <b>{{%plugin parameters...}}</b>.
-Например <b>{{%url route='/action/unique/id', params...}}</b>,
-<b>{{%widget name='content', id='NNN', lang='ЯЗ'}}</b>.
+Например <b>{{%url route='/action/unique/id', params...}}</b>
+или <b>{{%url url='/url/path/to', params...}}</b>,
+<b>{{%render action='/sys/content/main/render', id='NNN', lang='ЯЗ'}}</b>
+или <b>{{%render widget='content', id='NNN', lang='ЯЗ'}}</b>.
 </p>
 <p>...</p>
 

@@ -17,7 +17,7 @@ class ContentWidget extends Widget
     /** Language code or null for default */
     public $lang;
 
-    /** Parameter array */
+    /** Parameters array */
     public $params = [];
     
     /**

@@ -129,11 +129,11 @@ class TextProcessor
                 $widget = Yii::createObject($widgetParams);
                 $result = $widget->run();
             } else {
-                $msg = __METHOD__ . ": unknown widget '{{%widget name=$name }}'. Real params is " . var_export($params, true);
+                $msg = __METHOD__ . ": unknown widget {{%render widget='{$name}'}}. Real params is: " . var_export($params, true);
                 Yii::error($msg);
             }
         } else {
-            $msg = __METHOD__ . ": '{{%widget}}' must have 'name' parameter. Real params is " . var_export($params, true);
+            $msg = __METHOD__ . ": '{{%render}}' must have 'action' or 'widget' parameter. Real params is: " . var_export($params, true);
             Yii::error($msg);
         }
         return $result;
