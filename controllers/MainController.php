@@ -140,16 +140,25 @@ class MainController extends BaseMultilangController
         }
         $node = $this->model->node($contentId);
         if (empty($node)) {
-            $msg = __METHOD__ . ": node id = '{$contentId}' not found.";
+            $msg = __METHOD__ . ": node id='{$contentId}' not found.";
             Yii::error($msg);
             return '';
         }
 
-        $text = $node->i18n[$lang]->text;
+        if (isset($node->i18n[$lang]->text)) {
+            $text = $node->i18n[$lang]->text;
+        } else {
+            $msg = __METHOD__ . ": for node id='{$contentId}', lang='$lang' not found text.";
+            Yii::error($msg);
+            return '';
+        }
 
         // processing parameters in format '{{param}}', translation table get from unserialized $params
         $defParams = $this->getDefaultParams($node);
         $params = @unserialize($params);//var_dump($params);
+        if (!is_array($params)) { // $params must be array (on error unserialize() return false)
+            $params = [];
+        }
         $params = ArrayHelper::merge($defParams, $params);//var_dump($params);
         $text = TextProcessor::textPreprocess($text, $params);
         return $text;
@@ -174,6 +183,5 @@ class MainController extends BaseMultilangController
         ];
         return $params;
     }
-
 
 }

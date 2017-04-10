@@ -108,19 +108,24 @@ class TextProcessor
     }
 
     /**
-     * Processing "{{%widget name='...', paramN='...',}]"
+     * Processing "{{%render widget|action='...', paramN='...',}]"
      * @param array $params
      * @return string result string or '' on any error
      */
-    protected static function pluginWidget($params)
+    protected static function pluginRender($params)
     {//echo __METHOD__;var_dump($params);
         $result = '';
-        if (!empty($params['name'])) {
-            $name = $params['name'];
-            unset($params['name']);
+        if (!empty($params['action'])) {
+            $actionUid = $params['action'];
+            unset($params['action']);//echo"runAction($actionUid):";var_dump($params);
+            $result = Yii::$app->runAction($actionUid, $params);
+        } else 
+        if (!empty($params['widget'])) {
+            $name = $params['widget'];
+            unset($params['widget']);
             if (isset(static::$widgets[$name])) {
                 $widgetParams = $params;
-                $widgetParams['class'] = static::$widgets[$name];//var_dump($widgetParams);exit;
+                $widgetParams['class'] = static::$widgets[$name];//echo'widgetParams:';var_dump($widgetParams);
                 $widget = Yii::createObject($widgetParams);
                 $result = $widget->run();
             } else {
