@@ -1,6 +1,6 @@
 {
     "name": "asbsoft/yii2module-content_2_170309",
-    "description": "Simple Yii2 content module",
+    "description": "Simple Yii2 content management module",
     "keywords": ["yii2"],
     "type": "yii2-module",
     "license": "BSD-3-Clause",
@@ -23,7 +23,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "asb\\modules\\content_2_170309\\": ""
+            "asb\\yii2\\modules\\content_2_170309\\": ""
         }
     }
 }
