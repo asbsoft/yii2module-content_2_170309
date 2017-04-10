@@ -5,11 +5,13 @@ namespace asb\yii2\modules\content_2_170309\controllers;
 use asb\yii2\modules\content_2_170309\models\Content;
 use asb\yii2\modules\content_2_170309\models\ContentI18n;
 use asb\yii2\modules\content_2_170309\models\Formatter;
+use asb\yii2\modules\content_2_170309\models\TextProcessor;
 
 use asb\yii2\common_2_170212\controllers\BaseMultilangController;
 
 use Yii;
 use yii\web\NotFoundHttpException;
+use yii\helpers\ArrayHelper;
 
 /**
  * Main frontend controller.
@@ -56,15 +58,8 @@ class MainController extends BaseMultilangController
         }//var_dump($i18n->attributes);
 
         $model->correctSelectedText();
-        $fmt = new Formatter;
-        $text = $this->textPreprocess($model->i18n[$this->lang]->text, [
-            'title'   => $model->title,
-            'slug'    => $model->slug,
-            'owner'   => $fmt->asUsername($model->owner_id),
-            'created' => $model->create_time,
-            'updated' => $model->update_time,
-            //...
-        ]);//var_dump($text);
+        $params = $this->getDefaultParams($model);
+        $text = TextProcessor::textPreprocess($model->i18n[$this->lang]->text, $params);//var_dump($text);
 
         return $this->render('view', [
             'text' => $text,
@@ -124,7 +119,7 @@ class MainController extends BaseMultilangController
      * @param string|integer $id
      * @param string $lang
      * @param string $params additional params - only string - need serialize for array
-     * @return string
+     * @return string  result text or '' on any error
      */
     public function actionRender($id, $lang = null, $params = '')
     {//echo __METHOD__."($id, $lang)";var_dump($params);
@@ -132,49 +127,53 @@ class MainController extends BaseMultilangController
         $langHelper = $this->module->langHelper;
         $lang = $langHelper::normalizeLangCode($lang);
 
-        if (is_integer($id)) {
+        if (is_numeric($id)) {
             $contentId = $id;
         } else {
             $contentId = $this->model->getIdBySlugPath($id);
         }//var_dump($contentId);
 
-/*
-        $i18n = $this->module->model('ContentI18n')->findOne([
-            'content_id' => $contentId,
-            'lang_code' => $lang,
-        ]);//var_dump($i18n);
-        if (empty($i18n)) return '';
-        $i18n->correctSelectedText();
-        $text = $i18n->text
-*/
+        if (empty($contentId)) {
+            $msg = __METHOD__ . ": illegal id = '$id'.";
+            Yii::error($msg);
+            return '';
+        }
         $node = $this->model->node($contentId);
+        if (empty($node)) {
+            $msg = __METHOD__ . ": node id = '{$contentId}' not found.";
+            Yii::error($msg);
+            return '';
+        }
+
         $text = $node->i18n[$lang]->text;
 
         // processing parameters in format '{{param}}', translation table get from unserialized $params
+        $defParams = $this->getDefaultParams($node);
         $params = @unserialize($params);//var_dump($params);
-        $text = $this->textPreprocess($text, $params);
+        $params = ArrayHelper::merge($defParams, $params);//var_dump($params);
+        $text = TextProcessor::textPreprocess($text, $params);
         return $text;
     }
 
     /**
-     * Text substitutions by $params.
-     * @param string $text
-     * @param array $params
-     * @return string
+     * Get default substitution params.
+     * @param Content $model
+     * @return array
      */
-    public function textPreprocess($text, $params)
+    public function getDefaultParams($model)
     {
-        $trtab = [];
-        if (is_array($params)) {
-            foreach ((array)$params as $name => $value) {
-                $trtab['{{' . $name . '}}'] = $value;
-            }
-            $text = strtr($text, $trtab);
-        }
-        // erase if not in translation table
-        $text = preg_replace('/{{[^}]*}}/', '', $text);//var_dump($text);
-
-        return $text;
+        $fmt = new Formatter;
+        $params = [
+            'title'   => $model->title,
+            'slug'    => $model->slug,
+            'path'    => $model::getNodePath($model),
+            'owner'   => $fmt->asUsername($model->owner_id),
+            'created' => $model->create_time,
+            'updated' => $model->update_time,
+            //...
+        ];
+        return $params;
     }
+
 
 }

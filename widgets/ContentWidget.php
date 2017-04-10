@@ -11,11 +11,14 @@ use Exception;
 
 class ContentWidget extends Widget
 {
+    /** Content id: numeric or path */
     public $id;
 
+    /** Language code or null for default */
     public $lang;
 
-    public $params;
+    /** Parameter array */
+    public $params = [];
     
     /**
      * @inheritdoc
