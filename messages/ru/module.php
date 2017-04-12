@@ -59,6 +59,8 @@ return array_merge($instruction, [
     'Tree is empty'     => 'Дерево пусто',
     "Moderator can't create articles"
                         => 'Модератор не может создавать статьи',
+    "When create new record you can't upload images in text editor. You can do this in update mode"
+ => "При создании новой записи вы не сможете загружать изображения в текстовом редакторе. Вы сможете сделать это при редактировании",
 
 // models
     'ID'                => 'Ид',
