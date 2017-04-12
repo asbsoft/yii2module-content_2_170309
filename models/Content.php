@@ -239,12 +239,12 @@ class Content extends ContentBase
      * @return string
      */
     public static function getNodePath($node)
-    {//echo __METHOD__."($node->id)<br>";
+    {//echo __METHOD__."({$node->id})<br>";
         $result = '';
         if ($node instanceof static) {//var_dump($node->attributes);
             $result = $node->slug;
-            if (!empty($node->parend_id)) {
-                $parent = static::node($node->parend_id);
+            if (!empty($node->parent_id)) {
+                $parent = static::node($node->parent_id);
                 if (!empty($parent)) {
                     $result = static::getNodePath($parent) . '/' . $result;
                 }

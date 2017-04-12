@@ -88,7 +88,7 @@ class ContentMenuBuilder
      * @return string|false
      */
     protected static function checkRoutesLink($node)
-    {//echo __METHOD__;var_dump($node->id);
+    {//echo __METHOD__."({$node->id})<br>";
         $nodeLink = static::$_model->getNodePath($node);//var_dump($nodeLink);
 
         // find route 
