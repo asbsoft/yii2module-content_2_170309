@@ -80,5 +80,9 @@ return array_merge($instruction, [
                         => 'Удаление не удалось по причине',
     'At least one title or text field must be fill'
                         => 'Хотя бы один заголовок или текст должен быть заполнен',
+    'Saving unsuccessfull'
+                        => 'Сохранение не удалось',
+    'Saving unsuccessfull by the reason'
+                        => 'Сохранение не удалось по причине',
 
 ]);

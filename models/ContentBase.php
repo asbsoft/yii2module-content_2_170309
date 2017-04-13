@@ -351,10 +351,13 @@ class ContentBase extends DataModel
                 }
             }
         } catch (Exception $e) {
-            $transaction->rollBack();
-            //throw $e;
-            Yii::$app->session->setFlash('error'
-              , Yii::t($this->tcModule, 'Saving unsuccessfull by the reason') . ': ' . $e->getMessage());
+            $transaction->rollBack();//throw $e;
+
+            $msg = Yii::t($this->tcModule, 'Saving unsuccessfull');
+            $msgFull = Yii::t($this->tcModule, 'Saving unsuccessfull by the reason') . ': ' . $e->getMessage();
+            Yii::error($msgFull);
+            $showError = isset($this->module->params['showAdminSqlErrors']) && $this->module->params['showAdminSqlErrors'];
+            Yii::$app->session->setFlash('error', $showError ? $msgFull : $msg);
             return false;
         }//var_dump($result);var_dump($this->errors);//exit;
         if ($result) {
