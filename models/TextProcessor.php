@@ -139,4 +139,19 @@ class TextProcessor
         return $result;
     }
 
+    /**
+     * Processing "{{%htmlsym code='CODE'" as '&#CODE;' or {{%htmlsym alias='ALIAS'}} as '&ALIAS;'.
+     * @param array $params
+     * @return string result string or '' on any error
+     */
+    protected static function pluginHtmlsym($params)
+    {
+        if (!empty($params['code'])) {
+            return "&#{$params['code']};";
+        } elseif (!empty($params['alias'])) {
+            return "&{$params['alias']};";
+        } else {
+            return '';
+        }
+    }
 }
