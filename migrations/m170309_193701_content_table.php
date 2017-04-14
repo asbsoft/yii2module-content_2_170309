@@ -17,10 +17,6 @@ class m170309_193701_content_table extends Migration
     {
         parent::init();
 
-        // if problems with autoload (classes not found):
-        //Yii::setAlias('@asb/yii2', dirname(dirname(dirname(__DIR__))) . '/yii2-common_2_170212');
-        //Yii::setAlias('@asb/yii2/modules/content_2_170309', dirname(__DIR__));//var_dump(Yii::$aliases);exit;
-
         $this->tableName     = Content::tableName();
         $this->idxNamePrefix = 'idx-' . Content::baseTableName();
     }

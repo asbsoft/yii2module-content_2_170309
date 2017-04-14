@@ -2,6 +2,7 @@
 
 use asb\yii2\modules\content_2_170309\Module;
 use asb\yii2\modules\content_2_170309\models\ContentI18n;
+use asb\yii2\modules\content_2_170309\models\Content;
 
 use yii\db\Migration;
 
@@ -10,33 +11,34 @@ use yii\db\Migration;
  */
 class m170309_193702_content_i18n_table extends Migration
 {
+    protected $tableNameI18n;
     protected $tableName;
     protected $idxNamePrefix;
+    protected $fkName;
 
     public function init()
     {
         parent::init();
 
-        // if problems with autoload (classes not found):
-        //Yii::setAlias('@asb/yii2', dirname(dirname(dirname(__DIR__))) . '/yii2-common_2_170212');
-        //Yii::setAlias('@asb/yii2/modules/content_2_170309', dirname(__DIR__));//var_dump(Yii::$aliases);exit;
-
-        $this->tableName     = ContentI18n::tableName();
-        $this->idxNamePrefix = 'idx-' . ContentI18n::baseTableName();
+        $this->tableNameI18n = ContentI18n::tableName();
+        $this->tableName     = Content::tableName();
+        $this->idxNamePrefix = 'idx-' . ContentI18n::basetableName();
+        $this->fkName        = 'fk_' . ContentI18n::basetableName();
     }
     
     public function safeUp()
     {
         $tableOptions = null;
 
-        $this->createTable($this->tableName, [
+        $this->createTable($this->tableNameI18n, [
             'id' => $this->primaryKey(),
             'content_id' => $this->integer()->notNull(),
             'lang_code' => $this->string(5)->notNull(),
             'title' => $this->string(255),
             'text' => $this->text(),
         ], $tableOptions);
-        $this->createIndex("{$this->idxNamePrefix}-content-id",  $this->tableName, 'content_id');
+        $this->createIndex("{$this->idxNamePrefix}-content-id",  $this->tableNameI18n, 'content_id');
+        $this->addForeignKey($this->fkName, $this->tableNameI18n, 'content_id', $this->tableName, 'id', 'CASCADE', 'RESTRICT');
     }
 
     public function safeDown()
@@ -44,7 +46,8 @@ class m170309_193702_content_i18n_table extends Migration
         //echo basename(__FILE__, '.php') . " cannot be reverted.\n";
         //return false;
 
-        $this->dropTable($this->tableName);
+        $this->dropForeignKey("fk_{$this->tableNameI18n}", $this->tableNameI18n);
+        $this->dropTable($this->tableNameI18n);
     }
 
 }
