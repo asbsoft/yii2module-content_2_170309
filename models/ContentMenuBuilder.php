@@ -100,9 +100,12 @@ class ContentMenuBuilder
             }
         }
         if ($result) {
+            $result = '/' . $nodeLink;
             $lh = static::langHelperClass();
-            $lang = $lh::getLangCode2(static::language());
-            $result = '/' . $lang . '/' . $nodeLink;
+            if ($lh::countActiveLanguages() > 1) {
+                $lang = $lh::getLangCode2(static::language());
+                $result = '/' . $lang . '/' . $nodeLink;
+            }
         }//var_dump($result);exit;
         return $result;
     }
