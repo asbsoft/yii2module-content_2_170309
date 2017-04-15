@@ -119,8 +119,16 @@ class AdminController extends BaseAdminMulangController
      */
     public function actionView($id)
     {
+        $model = $this->findModel($id);
+        $modelsI18n = $model->prepareI18nModels();
+
+        if ($model->pageSize > 0) {
+            $model->orderBy = $model::$defaultOrderBy;
+            $model->page = $model->calcPage();//echo __METHOD__.": calcPage(id={$id},pageSize={$model->pageSize})={$model->page}<br>";exit;
+        }
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
+            'modelsI18n' => $modelsI18n,
         ]);
     }
 

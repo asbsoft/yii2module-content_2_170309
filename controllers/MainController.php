@@ -45,25 +45,29 @@ class MainController extends BaseMultilangController
      * @param boolean $strict search regime:
      *     if content not found and $strict = true throws exception
      *     if content not found and $strict = false find first child with content
+     * @param string $langCode language code
+     * @param boolean $layout show page with layout or partial
      * @return mixed
      * @throws NotFoundHttpException if content not found or unvisible
      */
-    public function actionView($id = 0, $strict = false)
-    {//echo __METHOD__."($id)";
-
+    public function actionView($id = 0, $strict = false, $langCode = null, $layout = true)
+    {//echo __METHOD__."($id,$strict,$langCode,$layout)<br>";
+        if (empty($langCode)) $langCode = $this->lang;
         $model = $this->findContent($id, !$strict);//var_dump($model);exit;
 
-        if (empty($model->i18n[$this->lang]->text)) {
+        if (empty($model->i18n[$langCode]->text)) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         }//var_dump($i18n->attributes);
 
         $model->correctSelectedText();
-        $params = $this->getDefaultParams($model);
-        $text = TextProcessor::textPreprocess($model->i18n[$this->lang]->text, $params);//var_dump($text);
+        $params = $this->getDefaultParams($model, $langCode);
+        $text = TextProcessor::textPreprocess($model->i18n[$langCode]->text, $params);//var_dump($text);
 
-        return $this->render('view', [
-            'text' => $text,
-        ]);
+        if ($layout) {
+            return $this->render('view', ['text' => $text]);
+        } else {
+            return $this->renderPartial('view', ['text' => $text]);
+        }
     }
     /**
      * Find content for $fromId.
@@ -167,20 +171,21 @@ class MainController extends BaseMultilangController
     /**
      * Get default substitution params.
      * @param Content $model
+     * @param string $langCode
      * @return array
      */
-    public function getDefaultParams($model)
-    {
+    public function getDefaultParams($model, $langCode)
+    {//echo __METHOD__."(model,$langCode)<br>";
         $fmt = new Formatter;
         $params = [
-            'title'   => $model->title,
+            'title'   => $model->i18n[$langCode]->title, // $model->title = const (for def lang)
             'slug'    => $model->slug,
             'path'    => $model::getNodePath($model),
             'owner'   => $fmt->asUsername($model->owner_id),
             'created' => $model->create_time,
             'updated' => $model->update_time,
             //...
-        ];
+        ];//var_dump($params);
         return $params;
     }
 

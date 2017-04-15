@@ -93,7 +93,9 @@ class ContentBase extends DataModel
         $this->pageSize = $this->pageSizeAdmin; // default pageSize for model
 
         $this->langHelper = new $this->module->langHelper;
-        $this->languages = $this->langHelper->activeLanguages();
+        $param = 'editAllLanguages';
+        $editAllLanguages = empty($this->module->params[$param]) ? false : $this->module->params[$param];
+        $this->languages = $this->langHelper->activeLanguages($editAllLanguages);//var_dump($this->languages);
         if (empty($this->langCodeMain) ) {
             $this->langCodeMain = $this->langHelper->normalizeLangCode(Yii::$app->language);
         }

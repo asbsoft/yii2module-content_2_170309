@@ -38,7 +38,9 @@
     $enableEditVisibility = (!Yii::$app->user->can('roleContentModerator') && Yii::$app->user->can('roleContentAuthor')) ? false : true;//var_dump($enableEditVisibility);
 
     $langHelper = $this->context->module->langHelper;
-    $languages = $langHelper::activeLanguages();
+    $editAllLanguages = empty($this->context->module->params['editAllLanguages'])
+                      ? false : $this->context->module->params['editAllLanguages'];
+    $languages = $langHelper::activeLanguages($editAllLanguages);
 
     $modelsI18n = $model->i18n;
 
