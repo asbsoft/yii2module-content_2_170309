@@ -158,7 +158,7 @@ class MainController extends BaseMultilangController
         }
 
         // processing parameters in format '{{param}}', translation table get from unserialized $params
-        $defParams = $this->getDefaultParams($node);
+        $defParams = $this->getDefaultParams($node, $lang);
         $params = @unserialize($params);//var_dump($params);
         if (!is_array($params)) { // $params must be array (on error unserialize() return false)
             $params = [];
