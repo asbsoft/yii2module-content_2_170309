@@ -2,11 +2,14 @@
 
 namespace asb\yii2\modules\content_2_170309\models;
 
+use asb\yii2\common_2_170212\i18n\LangHelper;
+
 use asb\yii2\modules\content_2_170309\Module;
 use asb\yii2\modules\content_2_170309\models\ContentI18n;
 
 use Yii;
 use yii\db\ActiveQuery;
+use yii\base\InvalidConfigException;
 
 /**
  * This is the ActiveQuery class for [[Content]].
@@ -28,9 +31,17 @@ class ContentQuery extends ActiveQuery
         $this->alias($this->tableAliasMain);
 
         if (empty($this->langCodeMain) ) {
-            $module = Module::getModuleByClassname(Module::className());
+            $this->langCodeMain = LangHelper::normalizeLangCode(Yii::$app->language);
+
+/*?? error on run by codeception
+            $module = Module::getModuleByClassname(Module::className()); //?? return NULL in func tests
+            //$module = Module::getModuleByClassname(Module::className(), true); // load anonimous follow translations problem
+            if (empty($module)) {//var_dump(array_keys(Yii::$app->modules));var_dump(array_keys(Yii::$app->loadedModules));
+                throw new InvalidConfigException("Can't load content module " . Module::className());
+            }
             $langHelper = $module->langHelper;
             $this->langCodeMain = $langHelper::normalizeLangCode(Yii::$app->language);
+/**/
         }
     }
 
