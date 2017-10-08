@@ -63,3 +63,9 @@
 .navbar {
     margin-bottom: 5px;
 }
+
+.content-example {
+    min-height: 15px;
+    border: solid 1px black;/**/
+    background-color: #EEE;/**/
+}

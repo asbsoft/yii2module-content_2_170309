@@ -47,15 +47,16 @@ class MainController extends BaseMultilangController
      *     if content not found and $strict = false find first child with content
      * @param string $langCode language code
      * @param boolean $layout show page with layout or partial
+     * @param boolean $showEmptyContent show without texts instead of exception
      * @return mixed
      * @throws NotFoundHttpException if content not found or unvisible
      */
-    public function actionView($id = 0, $strict = false, $langCode = null, $layout = true)
-    {//echo __METHOD__."($id,$strict,$langCode,$layout)<br>";
+    public function actionView($id = 0, $strict = false, $langCode = null, $layout = true, $showEmptyContent = false)
+    {//echo __METHOD__."($id,$strict,$langCode,$layout)<br>";//exit;
         if (empty($langCode)) $langCode = $this->lang;
-        $model = $this->findContent($id, !$strict);//var_dump($model);exit;
+        $model = $this->findContent($id, !$strict, $showEmptyContent);//var_dump($model);exit;
 
-        if (empty($model->i18n[$langCode]->text)) {
+        if (empty($model) || ($strict && empty($model->i18n[$langCode]->text))) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         }//var_dump($i18n->attributes);
 
@@ -74,15 +75,18 @@ class MainController extends BaseMultilangController
      * If not found and $tryNext search content at first by order visible child(s).
      * @param integer $fromId
      * @param boolean $tryNext
+     * @param boolean $showEmptyContent return model without texts instead of exception
      * @return Content|empty
      * @throws NotFoundHttpException if content not found or unvisible
      */
-    public function findContent($fromId, $tryNext = false)
-    {//echo __METHOD__."($fromId,$tryNext)<br>";
+    public function findContent($fromId, $tryNext = false, $showEmptyContent = false)
+    {//echo __METHOD__."($fromId,$tryNext,$showEmptyContent)<br>";
         $model = $this->model->node($fromId);//if(!empty($model))var_dump($model->attributes);else var_dump($model);
 
         if (!empty($model->i18n[$this->lang]->title) && !empty($model->i18n[$this->lang]->text)) {//echo __METHOD__."($fromId,$tryNext):FOUND:#{$model->id}<br>";exit;
             return $model;
+        } else if ($showEmptyContent && !empty($model->i18n[$this->lang])) {
+            return $model; // in backend can view content without title/body
       //} else if ((empty($model) || !$model->is_visible) && !$tryNext) {
         } else if (!$tryNext || (isset($model->is_visible) && !$model->is_visible)) {//echo __METHOD__."($fromId,$tryNext):NOTfound<br>";exit;
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
@@ -98,7 +102,7 @@ class MainController extends BaseMultilangController
                     break;
                 }
             }
-        }//echo __METHOD__."($fromId,$tryNext):return:FALSE<br>";
+        }//echo __METHOD__."($fromId,$tryNext):return:FALSE<br>";exit;
         return false;
     }
 

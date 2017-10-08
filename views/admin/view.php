@@ -93,14 +93,17 @@
                         }
                     ?>
                 </p>
-                <?php // show as it will show at frontend
-                    echo Yii::$app->runAction("{$moduleUid}/main/view", [
-                        'id'       => $model->id,
-                        'strict'   => true,
-                        'langCode' => $langCode,
-                        'layout'   => false,
-                    ]);
-                ?>
+                <div class="content-example">
+                    <?php // show as it will show at frontend
+                        echo Yii::$app->runAction("{$moduleUid}/main/view", [
+                            'id'       => $model->id,
+                            'strict'   => false,
+                            'langCode' => $langCode,
+                            'layout'   => false,
+                            'showEmptyContent' => true,
+                        ]);
+                    ?>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
