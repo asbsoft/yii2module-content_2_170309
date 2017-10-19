@@ -1,8 +1,6 @@
 <?php
 namespace asb\yii2\modules\content_2_170309\controllers;
 
-use asb\yii2\modules\news_1b_160430\Module;
-
 use asb\yii2\common_2_170212\widgets\ckeditor\ElFinderController as BaseController;
 
 use mihaildev\elfinder\PathController;
