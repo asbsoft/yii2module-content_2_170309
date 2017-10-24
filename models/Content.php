@@ -40,9 +40,9 @@ class Content extends ContentBase
     public function save($runValidation = true, $attributeNames = null)
     {
         $result = parent::save($runValidation, $attributeNames);//var_dump($result);var_dump($this->errors);var_dump($this->attributes);exit;
-        $id = $this->id;
-        $parent = $this->parent_id;
-        static::cleanCache($id, $parent);
+        if (!empty($this->id)) {
+            static::cleanCache($this->id, $this->parent_id);
+        }
         return $result;
     }
 
