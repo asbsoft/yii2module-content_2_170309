@@ -177,7 +177,14 @@
                     ]),
                     'content' => function ($model, $key, $index, $column) use($indexRoute) {
                             $url = Url::toRoute([$indexRoute, 'parent' => $key]);
-                            return Html::a($model->slug, $url);
+                            $nodeLink = Html::a($model->slug, $url);
+                            $moduleInfo = $model::checkModuleLink($model);
+                            $moduleLink = !is_array($moduleInfo) ? '' : (
+                                empty($moduleInfo['href'])
+                                    ? sprintf("(%s)", $moduleInfo['text']) // without link
+                                    : sprintf("<a href=\"%s\">(%s)</a>", $moduleInfo['href'], $moduleInfo['text'])
+                            );
+                            return sprintf("<span>%s %s</span>", $nodeLink, $moduleLink);
                     },
                 ],
                 'title',

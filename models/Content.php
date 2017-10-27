@@ -2,6 +2,11 @@
 
 namespace asb\yii2\modules\content_2_170309\models;
 
+use asb\yii2\modules\content_2_170309\Module;
+use asb\yii2\common_2_170212\web\RoutesBuilder;
+
+use Yii;
+
 /**
  * Caching and additional method for processing content tree.
  * @author Alexandr Belogolovsky <ab2014box@gmail.com>
@@ -266,5 +271,55 @@ class Content extends ContentBase
         }
         return static::$_language;
     }
+
+    /**
+     * Check if node's link belongs to route of exists module but not to this module ('main/view' action)
+     * @param static $node
+     * @return array|false found module's info
+     */
+    public static function checkModuleLink($node)
+    {
+        $module = Module::getModuleByClassname(Module::className());
+        $langHelper = $module->langHelper;
+
+        $contentAction = "{$module->uniqueId}/main/view"; // route to reject
+
+        $nodeLink = static::getNodePath($node);//var_dump($nodeLink);
+
+        $moduleInfo = false;
+        
+        // find such route 
+        $resultRule = false;
+        foreach (Yii::$app->urlManager->rules as $nextRule) {
+            if (RoutesBuilder::properRule($nextRule, $nodeLink)) {
+                if (isset($nextRule->route) && $nextRule->route == $contentAction) {
+                    continue;
+                }
+                $resultRule = $nextRule;
+                break;
+            }
+        }//var_dump($resultRule);
+        $moduleInfo = false;
+        if ($resultRule) {
+            if (isset($resultRule->route)) {
+                $route = $resultRule->route;
+            } else if (isset($resultRule->rules[0])) { // yii\web\GroupUrlRule
+                $route = $resultRule->rules[0]->route;
+            } else {
+                $route = false; // unsupported route type
+            }
+            $href = false; // unknown link to module's backend
+            if ($route) {
+                //todo: need link to backend of module
+                //$href = getBackLinkToModuleByRoute($route);
+            }
+            $moduleInfo = [
+                'text' => Yii::t($module->tcModule, 'module'),
+                'href' => $href,
+            ];
+        }//
+        return $moduleInfo;
+    }
+
 
 }

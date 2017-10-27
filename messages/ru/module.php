@@ -86,5 +86,6 @@ return array_merge($instruction, [
                         => 'Сохранение не удалось',
     'Saving unsuccessfull by the reason'
                         => 'Сохранение не удалось по причине',
+    'module'            => 'модуль',
 
 ]);
