@@ -23,15 +23,18 @@ class Module extends UniModule
     {
         parent::bootstrap($app);
 
-        $app->defaultRoute = $this->uniqueId . '/main/view'; // new default route
+        $disableFrontRoutes = isset($this->routesConfig['main']) && $this->routesConfig['main'] == false;//var_dump($disableFrontRoutes);var_dump($this->routesConfig);exit;
+        if (!$disableFrontRoutes) {
+            $app->defaultRoute = $this->uniqueId . '/main/view'; // new default route
 
-        $app->on(Application::EVENT_BEFORE_REQUEST, function($event) use($app) {//echo __METHOD__;var_dump($event->name);
-            //$routes = RoutesInfo::showRoutes();echo"before:<pre>$routes</pre>";
-            $routesModel = new ContentRoutesBootstrap;
-            $routesModel->moduleUid = $this->uniqueId;
-            $routes = $routesModel->getRoutes();//var_dump($routes);
-            $app->urlManager->addRules($routes);//$routes = RoutesInfo::showRoutes();echo"after:<pre>$routes</pre>";
-        });
+            $app->on(Application::EVENT_BEFORE_REQUEST, function($event) use($app) {//echo __METHOD__;var_dump($event->name);
+                //$routes = RoutesInfo::showRoutes();echo"before:<pre>$routes</pre>";
+                $routesModel = new ContentRoutesBootstrap;
+                $routesModel->moduleUid = $this->uniqueId;
+                $routes = $routesModel->getRoutes();//var_dump($routes);
+                $app->urlManager->addRules($routes);//$routes = RoutesInfo::showRoutes();echo"after:<pre>$routes</pre>";
+            });
+        }
     }
 
 }
