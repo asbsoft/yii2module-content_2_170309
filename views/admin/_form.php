@@ -34,6 +34,7 @@
     $tc = $this->context->tcModule;
 
     $userIdentity = $this->context->module->userIdentity;
+    $usersNamesList = method_exists($userIdentity, 'usersNames') ? $userIdentity::usersNames() : false;
 
     $enableEditVisibility = (!Yii::$app->user->can('roleContentModerator') && Yii::$app->user->can('roleContentAuthor')) ? false : true;//var_dump($enableEditVisibility);
 
@@ -105,9 +106,9 @@
           <?php endif; ?>
         </div>
 
-        <?php if (Yii::$app->user->can('roleContentModerator')): ?>
+        <?php if (Yii::$app->user->can('roleContentModerator') && $usersNamesList): ?>
         <div class="col-md-5">
-            <?= $form->field($model, 'owner_id')->dropDownList($userIdentity::usersNames(), [
+            <?= $form->field($model, 'owner_id')->dropDownList($usersNamesList, [
                     'id' => 'owner-id',
                     'prompt' => '-' . Yii::t($tc, 'select') . '-',
                     'class' => 'form-control',

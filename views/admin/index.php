@@ -52,7 +52,6 @@
     $this->title = Yii::t($tc, 'Contents');
     $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['index']];
 
-    $userIdentity = $this->context->module->userIdentity;
     $langHelper = $this->context->module->langHelper;
     $langCodeMain = $langHelper::normalizeLangCode(Yii::$app->language);
 
@@ -63,6 +62,10 @@
     $pager = $dataProvider->getPagination();
     $this->params['buttonOptions'] = ['data' => ['search' => $paramSearch, 'sort' => $paramSort, 'page' => $pager->page + 1]];
 
+    $userIdentity = $this->context->module->userIdentity;
+    $usersNamesList = method_exists($userIdentity, 'usersNames') ? $userIdentity::usersNames() : false;
+    $userFilter = (Yii::$app->user->can('roleContentModerator') && $usersNamesList) ? $usersNamesList : false;
+    
 ?>
 <div class="content-index">
     <div>
@@ -205,11 +208,7 @@
                     'attribute' => 'owner_id',
                     'label' => Yii::t($tc, 'Author'),
                     'format' => 'username',
-                    'filter' => (
-                        Yii::$app->user->can('roleContentModerator')
-                            ? $userIdentity::usersNames()
-                            : false
-                    ),
+                    'filter' => $userFilter,
                     'filterInputOptions' => ['class' => 'form-control', 'prompt' => '-' . Yii::t($tc, 'all') . '-'],
                 ],
 
