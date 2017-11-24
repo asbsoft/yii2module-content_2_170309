@@ -1,7 +1,6 @@
 <?php
 
 use asb\yii2\common_2_170212\base\UniApplication;
-use asb\yii2\common_2_170212\web\UserIdentity;
 use asb\yii2\common_2_170212\i18n\LangHelper;
 use asb\yii2\common_2_170212\helpers\EditorContentHelper;
 
@@ -17,7 +16,7 @@ return [
     ],
 
     // External using classes
-    'userIdentity'  => UserIdentity::className(),
+    'userIdentity'  => Yii::$app->user->identityClass,
     'langHelper'    => LangHelper::className(),
     'contentHelper' => EditorContentHelper::className(),
 
