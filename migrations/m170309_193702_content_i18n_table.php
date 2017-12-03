@@ -49,7 +49,7 @@ class m170309_193702_content_i18n_table extends Migration
         //echo basename(__FILE__, '.php') . " cannot be reverted.\n";
         //return false;
 
-        $this->dropForeignKey("fk_{$this->tableNameI18n}", $this->tableNameI18n);
+        $this->dropForeignKey($this->fkName, $this->tableNameI18n);
         $this->dropTable($this->tableNameI18n);
     }
 
