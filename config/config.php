@@ -9,12 +9,13 @@ $adminUrlPrefix = empty(Yii::$app->params['adminPath']) ? '' : Yii::$app->params
 $type = empty(Yii::$app->type) ? false : Yii::$app->type;//var_dump($type);exit;
 
 return [
+/*
     //'layoutPath' => '@asb/yii2cms/modules/sys/views/layouts',
     'layouts' => [ // (module/application) type => basename
         'frontend' => 'layout_main',
         'backend'  => 'layout_admin',
     ],
-
+*/
     // External using classes
     'userIdentity'  => Yii::$app->user->identityClass,
     'langHelper'    => LangHelper::className(),
