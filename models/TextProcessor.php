@@ -4,6 +4,7 @@ namespace asb\yii2\modules\content_2_170309\models;
 
 use Yii;
 use yii\helpers\Url;
+use yii\base\InvalidRouteException;
 
 /**
  * Content text preprocessing.
@@ -83,7 +84,7 @@ class TextProcessor
     }
 
     /**
-     * Processing "{{%url route='...', paramN='...',}]" as Url::toRoute()
+     * Processing "{{%url route='...' {, paramI='...'} }}" as Url::toRoute()
      * or "{{%url url='...', paramN='...',}]" as Url::to()
      * @param array $params
      * @return string result text or '' on any error
@@ -118,7 +119,14 @@ class TextProcessor
         if (!empty($params['action'])) {
             $actionUid = $params['action'];
             unset($params['action']);//echo"runAction($actionUid):";var_dump($params);
-            $result = Yii::$app->runAction($actionUid, $params);
+            try {
+                $result = Yii::$app->runAction($actionUid, $params);
+            } catch (InvalidRouteException $ex) {
+                $msg = __METHOD__ . ": not found action {{%render action='{$actionUid}'}}."
+                     . "\n + Real params is: " . var_export($params, true)
+                     . "\n + Exception message is: {$ex->getMessage()}";
+                Yii::error($msg);
+            }
         } else 
         if (!empty($params['widget'])) {
             $name = $params['widget'];
