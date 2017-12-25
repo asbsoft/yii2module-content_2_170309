@@ -100,7 +100,7 @@
                     <?= "#{$parentId}:" ?>
                     <?= '/' . $parentModel::nodePath($parentId) ?>
                     <br />
-                    <?= $parentModel->i18n[$langCodeMain]->title ?: Yii::t($tc, '[no title]') ?>
+                    <?= Html::encode($parentModel->i18n[$langCodeMain]->title) ?: Yii::t($tc, '[no title]') ?>
                 <?php endif; ?>
             </h4>
         </div>
