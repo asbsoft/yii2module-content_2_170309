@@ -49,7 +49,9 @@ class m170411_134500_content_startpage extends Migration
                 'content_id' => $contentId,
                 'lang_code'  => $language->code_full,
                 'title'      => 'Start page in ' . $language->name_en,
-                'text'       => "<h1>Hello world {$language->name_orig}!</h1>"
+                'text'       => "<h1>Start page title in {$language->name_en} </h1>"
+                              . "<h2>({$language->name_orig})</h2>"
+                              . "<p>Hello world!</p><p>Change this to original text.</p>"
                               . str_repeat("<p>Some text in {$language->name_orig}...</p>", 10),
             ]);
         }
