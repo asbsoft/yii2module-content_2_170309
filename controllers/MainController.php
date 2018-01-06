@@ -46,23 +46,29 @@ class MainController extends BaseMultilangController
      *     if content not found and $strict = true throws exception
      *     if content not found and $strict = false find first child with content
      * @param string $langCode language code
-     * @param boolean $layout show page with layout or partial
+     * @param boolean $layout show page with layout or render partial if false
      * @param boolean $showEmptyContent show without texts instead of exception
      * @return mixed
      * @throws NotFoundHttpException if content not found or unvisible
      */
     public function actionView($id = 0, $strict = false, $langCode = null, $layout = true, $showEmptyContent = false)
-    {//echo __METHOD__."($id,$strict,$langCode,$layout)<br>";//exit;
+    {
+        $module = $this->module;
+        if ($id == 0 && $module->params['useExternalStartPage'] && !empty($module::$savedDefaultRoute)) {
+            $action = $module::$savedDefaultRoute;
+            return Yii::$app->runAction($action);
+        }
+        
         if (empty($langCode)) $langCode = $this->lang;
-        $model = $this->findContent($id, !$strict, $showEmptyContent);//var_dump($model);exit;
+        $model = $this->findContent($id, !$strict, $showEmptyContent);
 
         if (empty($model) || ($strict && empty($model->i18n[$langCode]->text))) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
-        }//var_dump($i18n->attributes);
+        }
 
         $model->correctSelectedText();
         $params = $this->getDefaultParams($model, $langCode);
-        $text = TextProcessor::textPreprocess($model->i18n[$langCode]->text, $params);//var_dump($text);
+        $text = TextProcessor::textPreprocess($model->i18n[$langCode]->text, $params);
 
         if ($layout) {
             return $this->render('view', ['text' => $text]);
@@ -80,21 +86,21 @@ class MainController extends BaseMultilangController
      * @throws NotFoundHttpException if content not found or unvisible
      */
     public function findContent($fromId, $tryNext = false, $showEmptyContent = false)
-    {//echo __METHOD__."($fromId,$tryNext,$showEmptyContent)<br>";
-        $model = $this->model->node($fromId);//if(!empty($model))var_dump($model->attributes);else var_dump($model);
+    {
+        $model = $this->model->node($fromId);
 
-        if (!empty($model->i18n[$this->lang]->title) && !empty($model->i18n[$this->lang]->text)) {//echo __METHOD__."($fromId,$tryNext):FOUND:#{$model->id}<br>";exit;
+        if (!empty($model->i18n[$this->lang]->title) && !empty($model->i18n[$this->lang]->text)) {
             return $model;
         } else if ($showEmptyContent && !empty($model->i18n[$this->lang])) {
             return $model; // in backend can view content without title/body
       //} else if ((empty($model) || !$model->is_visible) && !$tryNext) {
-        } else if (!$tryNext || (isset($model->is_visible) && !$model->is_visible)) {//echo __METHOD__."($fromId,$tryNext):NOTfound<br>";exit;
+        } else if (!$tryNext || (isset($model->is_visible) && !$model->is_visible)) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         } else { // search content between children
-            $children = $this->model->nodeChildren($fromId);//var_dump(count($children));
+            $children = $this->model->nodeChildren($fromId);
             foreach ($children as $child) {
                 if ($child->is_visible && !empty($child->i18n[$this->lang]->title)) {
-                    if (!empty($child->i18n[$this->lang]->text)) {//echo __METHOD__."($fromId,$tryNext):found CHILD:#{$child->id}<br>";exit;
+                    if (!empty($child->i18n[$this->lang]->text)) {
                         return $child;
                     } else {
                         return $this->findContent($child->id, $tryNext);
@@ -102,7 +108,7 @@ class MainController extends BaseMultilangController
                     break;
                 }
             }
-        }//echo __METHOD__."($fromId,$tryNext):return:FALSE<br>";exit;
+        }
         return false;
     }
 
@@ -110,14 +116,14 @@ class MainController extends BaseMultilangController
      * @inheritdoc
      */
     public function findLayoutFile($view)
-    {//echo __METHOD__;var_dump($this->_contentLayout);
-        $layout = parent::findLayoutFile($view);//var_dump($layout);
+    {
+        $layout = parent::findLayoutFile($view);
         if (!empty($this->_contentLayout)) {
             $fname = Yii::getAlias($this->_contentLayout);
             if (is_file($fname)) $layout = $fname;
             else if (is_file($fname . '.php'))  $layout = $fname . '.php';
             else if (is_file($fname . '.twig')) $layout = $fname . '.twig';
-        }//var_dump($layout);exit;
+        }
         return $layout;
     }
 
@@ -130,7 +136,7 @@ class MainController extends BaseMultilangController
      * @return string  result text or '' on any error
      */
     public function actionRender($id, $lang = null, $params = '')
-    {//echo __METHOD__."($id, $lang)";var_dump($params);
+    {
         if (empty($lang)) $lang = Yii::$app->language;
         $langHelper = $this->module->langHelper;
         $lang = $langHelper::normalizeLangCode($lang);
@@ -139,7 +145,7 @@ class MainController extends BaseMultilangController
             $contentId = $id;
         } else {
             $contentId = $this->model->getIdBySlugPath($id);
-        }//var_dump($contentId);
+        }
 
         if (empty($contentId)) {
             $msg = __METHOD__ . ": illegal id = '$id'.";
@@ -163,11 +169,11 @@ class MainController extends BaseMultilangController
 
         // processing parameters in format '{{param}}', translation table get from unserialized $params
         $defParams = $this->getDefaultParams($node, $lang);
-        $params = @unserialize($params);//var_dump($params);
+        $params = @unserialize($params);
         if (!is_array($params)) { // $params must be array (on error unserialize() return false)
             $params = [];
         }
-        $params = ArrayHelper::merge($defParams, $params);//var_dump($params);
+        $params = ArrayHelper::merge($defParams, $params);
         $text = TextProcessor::textPreprocess($text, $params);
         return $text;
     }
@@ -179,7 +185,7 @@ class MainController extends BaseMultilangController
      * @return array
      */
     public function getDefaultParams($model, $langCode)
-    {//echo __METHOD__."(model,$langCode)<br>";
+    {
         $fmt = new Formatter;
         $params = [
             'title'   => $model->i18n[$langCode]->title, // $model->title = const (for def lang)
@@ -189,7 +195,7 @@ class MainController extends BaseMultilangController
             'created' => $model->create_time,
             'updated' => $model->update_time,
             //...
-        ];//var_dump($params);
+        ];
         return $params;
     }
 

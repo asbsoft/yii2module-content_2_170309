@@ -14,6 +14,12 @@ use yii\base\Application;
  */
 class Module extends UniModule
 {
+    // Action for processing content pages
+    const ACTION_DEF_ROUTE = 'main/view';
+
+    // Saved system default route
+    public static $savedDefaultRoute;
+    
     // Additional members - shared outside classes init from config
     public $userIdentity;
     public $langHelper;
@@ -23,16 +29,22 @@ class Module extends UniModule
     {
         parent::bootstrap($app);
 
-        $disableFrontRoutes = isset($this->routesConfig['main']) && $this->routesConfig['main'] == false;//var_dump($disableFrontRoutes);var_dump($this->routesConfig);exit;
-        if (!$disableFrontRoutes) {
-            $app->defaultRoute = $this->uniqueId . '/main/view'; // new default route
+        if (empty(static::$savedDefaultRoute)) {
+            static::$savedDefaultRoute = $app->defaultRoute;
+        }
 
-            $app->on(Application::EVENT_BEFORE_REQUEST, function($event) use($app) {//echo __METHOD__;var_dump($event->name);
+        $disableFrontRoutes = isset($this->routesConfig['main']) && $this->routesConfig['main'] == false;
+
+        if (!$disableFrontRoutes) {
+            $app->defaultRoute = $this->uniqueId . '/' . self::ACTION_DEF_ROUTE;
+
+            $app->on(Application::EVENT_BEFORE_REQUEST, function($event) use($app) {
                 //$routes = RoutesInfo::showRoutes();echo"before:<pre>$routes</pre>";
                 $routesModel = new ContentRoutesBootstrap;
                 $routesModel->moduleUid = $this->uniqueId;
-                $routes = $routesModel->getRoutes();//var_dump($routes);
-                $app->urlManager->addRules($routes);//$routes = RoutesInfo::showRoutes();echo"after:<pre>$routes</pre>";
+                $routes = $routesModel->getRoutes();
+                $app->urlManager->addRules($routes);
+                //$routes = RoutesInfo::showRoutes();echo"after:<pre>$routes</pre>";
             });
         }
     }
