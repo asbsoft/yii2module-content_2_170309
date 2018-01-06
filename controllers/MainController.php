@@ -70,10 +70,14 @@ class MainController extends BaseMultilangController
         $params = $this->getDefaultParams($model, $langCode);
         $text = TextProcessor::textPreprocess($model->i18n[$langCode]->text, $params);
 
+        $data = [
+            'title' => $model->i18n[$langCode]->title,
+            'text' => $text,
+        ];
         if ($layout) {
-            return $this->render('view', ['text' => $text]);
+            return $this->render('view', $data);
         } else {
-            return $this->renderPartial('view', ['text' => $text]);
+            return $this->renderPartial('view', $data);
         }
     }
     /**
