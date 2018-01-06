@@ -2,7 +2,8 @@
 //ru
 $instruction = include __DIR__ . '/instruction.php';
 return array_merge($instruction, [
-    'Content manager'      => 'Менеджер контента',
+    'Content manager'   => 'Менеджер контента',
+    'Adminer'           => 'Админка',
 
 // controllers
     "Node #{parent} '{toalias}' can't become parent of edited node #{id} '{slug}'"

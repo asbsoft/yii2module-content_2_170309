@@ -49,8 +49,9 @@
     $showTreeAction = "{$moduleUid}/admin/show-tree";
     $indexRoute = "/{$moduleUid}/admin/index";
 
-    $this->title = Yii::t($tc, 'Contents');
-    $this->params['breadcrumbs'][] = ['label' => $this->title, 'url' => ['index']];
+    $title = Yii::t($tc, 'Contents');
+    $this->title = Yii::t($tc, 'Adminer') . ' - ' . $title;
+    $this->params['breadcrumbs'][] = ['label' => $title, 'url' => ['index']];
 
     $langHelper = $this->context->module->langHelper;
     $langCodeMain = $langHelper::normalizeLangCode(Yii::$app->language);
@@ -70,7 +71,7 @@
 <div class="content-index">
     <div>
         <div class="col-md-2">
-            <h1 style="margin-top: 0"><?= Html::encode($this->title) ?></h1>
+            <h1 style="margin-top: 0"><?= Html::encode($title) ?></h1>
         </div>
         <div class="col-md-9">
             <?= Alert::widget(); ?>
