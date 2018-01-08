@@ -6,6 +6,7 @@ use asb\yii2\modules\content_2_170309\Module;
 use asb\yii2\common_2_170212\web\RoutesBuilder;
 
 use Yii;
+use yii\helpers\Url;
 
 /**
  * Caching and additional method for processing content tree.
@@ -44,7 +45,7 @@ class Content extends ContentBase
      */
     public function save($runValidation = true, $attributeNames = null)
     {
-        $result = parent::save($runValidation, $attributeNames);//var_dump($result);var_dump($this->errors);var_dump($this->attributes);exit;
+        $result = parent::save($runValidation, $attributeNames);
         if (!empty($this->id)) {
             static::cleanCache($this->id, $this->parent_id);
         }
@@ -66,9 +67,7 @@ class Content extends ContentBase
             } else {
                 return $result;
             }
-        }//var_dump(static::$_nodes[$id]->attributes);
-        //var_dump(static::$_nodes[$id]->title);var_dump(static::$_nodes[$id]->text); //!! for current(non-predicted) lang
-        //var_dump(static::$_nodes[$id]->i18n); //!! here is array for all langs
+        }
         return static::$_nodes[$id];
     }
     /** Save node path */
@@ -121,7 +120,7 @@ class Content extends ContentBase
      * @return array
      */
     public static function nodesTreeList($parentId = 0, $level = 0, $shiftPrefix = '. ')
-    {//echo __METHOD__."($parentId)<br>";
+    {
         if (!isset(static::$_nodesTreeList[$parentId][$level][$shiftPrefix])) {
             $tree = [];
             $list = [];
@@ -139,7 +138,7 @@ class Content extends ContentBase
             }
 
             $children = static::nodeChildren($parentId);
-            foreach ($children as $child) {//var_dump($child);
+            foreach ($children as $child) {
                 static::$_nodes[$child['id']] = $child;
                 $list += static::nodesTreeList($child->id, $level+1, $shiftPrefix);
                 $tree += static::nodesTree($child->id, $level+1, $shiftPrefix);
@@ -166,7 +165,7 @@ class Content extends ContentBase
      */
     public function hasChildren()
     {
-        $children = static::nodeChildren($this->id);//var_dump($children);exit;
+        $children = static::nodeChildren($this->id);
         return count($children) > 0 ? true : false;
     }
 
@@ -197,20 +196,20 @@ class Content extends ContentBase
      * @return boolean
      */
     public static function existsInParentsChain($nodeId, $parentId)
-    {//echo __METHOD__."($nodeId, $parentId)<br>";
+    {
         $nextParentId = $parentId;
         $exists = false;
-        while (true) {//echo "? movedNode:$nodeId == nextParent:$nextParentId<br>";
+        while (true) {
             if ($nodeId == $nextParentId) {
                 $exists = true;
                 break;
             }
 
-            $nextParentNode = static::node($nextParentId);//var_dump($nextParentNode);
+            $nextParentNode = static::node($nextParentId);
             if (empty($nextParentNode)) break;
 
             $nextParentId = $nextParentNode['parent_id'];
-         }//var_dump($exists);exit;
+         }
 
          return $exists;
     }
@@ -220,7 +219,7 @@ class Content extends ContentBase
      * @return integer|false
      */
     public static function getIdBySlugPath($path)
-    {//echo __METHOD__."($path)<br>";
+    {
         $path = trim($path);
         $path = trim($path, '/');
         $parts = explode('/', $path);
@@ -229,12 +228,12 @@ class Content extends ContentBase
         $list = static::findAll(['slug' => $slug]);
         $contentId = false;
         foreach ($list as $node) {
-            $nodePath = static::nodePath($node->id);//var_dump($nodePath);
+            $nodePath = static::nodePath($node->id);
             if ($path == trim($nodePath, '/')) {
                 $contentId = $node->id;
                 break;
             }
-        }//var_dump($contentId);exit;
+        }
         return $contentId;
     }
 
@@ -244,9 +243,9 @@ class Content extends ContentBase
      * @return string
      */
     public static function getNodePath($node)
-    {//echo __METHOD__."({$node->id})<br>";
+    {
         $result = '';
-        if ($node instanceof static) {//var_dump($node->attributes);
+        if ($node instanceof static) {
             $result = $node->slug;
             if (!empty($node->parent_id)) {
                 $parent = static::node($node->parent_id);
@@ -254,7 +253,7 @@ class Content extends ContentBase
                     $result = static::getNodePath($parent) . '/' . $result;
                 }
             }
-        }//var_dump($result);
+        }
         return $result;
     }
     
@@ -284,7 +283,7 @@ class Content extends ContentBase
 
         $contentAction = "{$module->uniqueId}/main/view"; // route to reject
 
-        $nodeLink = static::getNodePath($node);//var_dump($nodeLink);
+        $nodeLink = static::getNodePath($node);
 
         $moduleInfo = false;
         
@@ -298,28 +297,26 @@ class Content extends ContentBase
                 $resultRule = $nextRule;
                 break;
             }
-        }//var_dump($resultRule);
+        }
         $moduleInfo = false;
         if ($resultRule) {
             if (isset($resultRule->route)) {
                 $route = $resultRule->route;
             } else if (isset($resultRule->rules[0])) { // yii\web\GroupUrlRule
-                $route = $resultRule->rules[0]->route;
+                $route = $resultRule->rules[count($resultRule->rules) - 1]->route; // get latest route from group
             } else {
                 $route = false; // unsupported route type
             }
             $href = false; // unknown link to module's backend
             if ($route) {
-                //todo: need link to backend of module
-                //$href = getBackLinkToModuleByRoute($route);
+                $href = Url::toRoute(["/{$route}"]);
             }
             $moduleInfo = [
                 'text' => Yii::t($module->tcModule, 'module'),
                 'href' => $href,
             ];
-        }//
+        }
         return $moduleInfo;
     }
-
 
 }

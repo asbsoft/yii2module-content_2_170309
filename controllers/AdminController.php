@@ -56,7 +56,7 @@ class AdminController extends BaseAdminMulangController
             ],
         ];
         $behaviors = ArrayHelper::merge(parent::behaviors(), [
-            //'access' => ['rules' => $rules], // don't merdw - will rewrite
+            //'access' => ['rules' => $rules], // don't merge - will rewrite
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [

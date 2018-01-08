@@ -7,7 +7,6 @@
     use asb\yii2\modules\content_2_170309\models\Content;
     use asb\yii2\modules\content_2_170309\models\ContentSearch;
 
-    //use asb\yii2\common_2_170212\assets\CommonAsset;
     use asb\yii2\common_2_170212\assets\FlagAsset;
 
     use yii\helpers\Html;
@@ -22,18 +21,16 @@
     $this->params['breadcrumbs'][] = ['label' => Yii::t($tc, 'Contents'), 'url' => ['index']];
     $this->params['breadcrumbs'][] = $this->title;
 
-    //$assetsSys = CommonAsset::register($this);
     $assetsFlag = FlagAsset::register($this);
-    //$assets = AdminAsset::register($this);
-    $assets = $this->context->module->registerAsset('AdminAsset', $this);//var_dump($assets);
+    $assets = $this->context->module->registerAsset('AdminAsset', $this); // $assets = AdminAsset::register($this);
 
     $lh = $this->context->module->langHelper;
     $editAllLanguages = empty($this->context->module->params['editAllLanguages'])
                       ? false : $this->context->module->params['editAllLanguages'];
-    $languages = $lh::activeLanguages($editAllLanguages);//var_dump(array_keys($languages));
+    $languages = $lh::activeLanguages($editAllLanguages);
 
     $activeTab = $this->context->langCodeMain;
-    $actionViewUid = $this->context->module->uniqueId . '/main/view';//var_dump($actionViewUid);
+    $actionViewUid = $this->context->module->uniqueId . '/main/view';
 
 ?>
 <div class="content-admin-view">
@@ -72,11 +69,11 @@
         </ul>
         <div class="tab-content">
             <?php // multi-lang part - content
+              $moduleInfo = $model::checkModuleLink($model);
               foreach ($languages as $langCode => $lang):
                   $countryCode2 = strtolower(substr($langCode, 3, 2));
                   $flag = '<span class="flag f16"><span class="flag ' . $countryCode2 . '" title="' . $lang->name_orig . '"></span></span>';
                   $labels = $modelsI18n[$langCode]->attributeLabels();
-                  //var_dump($modelsI18n[$langCode]->attributes);
                   $modelI18n = $modelsI18n[$langCode];
             ?>
             <div id="tab-<?= $langCode ?>"
@@ -84,24 +81,30 @@
             >
                 <p>
                     <?php
-                        $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);//var_dump($link);
+                    if ($moduleInfo && $moduleInfo['href']) {
+                        echo Html::a($moduleInfo['text'], $moduleInfo['href'], ['target' => '_blank']);
+                    } else {
+                        $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
                         //if ($model->is_visible && ContentSearch::canShow($model, $modelI18n)) { //todo
                         if ($model->is_visible && $lang->is_visible) {
                             echo Html::a($link, $link, ['target' => '_blank']);
                         } else {
                             echo Yii::t($tc, 'Content invisible at frontend');
                         }
+                    }
                     ?>
                 </p>
                 <div class="content-example">
                     <?php // show as it will show at frontend
-                        echo Yii::$app->runAction("{$moduleUid}/main/view", [
-                            'id'       => $model->id,
-                            'strict'   => false,
-                            'langCode' => $langCode,
-                            'layout'   => false,
-                            'showEmptyContent' => true,
-                        ]);
+                        if (!$moduleInfo) {
+                            echo Yii::$app->runAction("{$moduleUid}/main/view", [
+                                'id'       => $model->id,
+                                'strict'   => false,
+                                'langCode' => $langCode,
+                                'layout'   => false,
+                                'showEmptyContent' => true,
+                            ]);
+                        }
                     ?>
                 </div>
             </div>
