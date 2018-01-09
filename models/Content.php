@@ -21,7 +21,6 @@ class Content extends ContentBase
     {
         unset(static::$_children[$parentOld]);
         unset(static::$_nodes[$id]);
-        unset(static::$_nodes[$id]);
         unset(static::$_i18n[$id]);
 
         $node = static::node($id);
@@ -46,8 +45,8 @@ class Content extends ContentBase
     public function save($runValidation = true, $attributeNames = null)
     {
         $result = parent::save($runValidation, $attributeNames);
-        if (!empty($this->id)) {
-            static::cleanCache($this->id, $this->parent_id);
+        if ($result && !empty($this->id)) {
+            static::cleanCache($this->id, $this->parent_id); // clear cache only on success change data in db
         }
         return $result;
     }

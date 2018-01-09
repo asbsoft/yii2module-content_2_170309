@@ -67,7 +67,7 @@ class AdminController extends BaseAdminMulangController
             ],
         ]);
         
-        $behaviors['access']['rules'] = $rules; //!! rewrite //var_dump($behaviors['access']['rules']);exit;
+        $behaviors['access']['rules'] = $rules; //!! rewrite
         return $behaviors;
     }
 
@@ -76,11 +76,11 @@ class AdminController extends BaseAdminMulangController
      * @return mixed
      */
     public function actionIndex($parent = '-', $page = 1)
-    {//echo __METHOD__."($parent,$page)<br>";
+    {
         $searchModel = $this->module->model('ContentSearch');
 
         // list filter parameters correction
-        $params = Yii::$app->request->queryParams;//var_dump($params);
+        $params = Yii::$app->request->queryParams;
         if (empty($parent) && !empty($params[$searchModel->formName()]['parent_id'])) {
             $parent = $params[$searchModel->formName()]['parent_id'];
         } else {
@@ -90,7 +90,7 @@ class AdminController extends BaseAdminMulangController
 
         if (!Yii::$app->user->can('roleContentModerator') && Yii::$app->user->can('roleContentAuthor')) {
             $params[$searchModel->formName()]['owner_id'] = Yii::$app->user->id;
-        }//var_dump($params);
+        }
 
         $dataProvider = $searchModel->search($params);
 
@@ -104,7 +104,7 @@ class AdminController extends BaseAdminMulangController
             $pager->page = $maxPage - 1;
         } else {
             $pager->page = $page - 1; //! from 0
-        }//var_dump($page);var_dump($pager->page);
+        }
 
         return $this->render('index', [
             'dataProvider' => $dataProvider,
@@ -124,7 +124,7 @@ class AdminController extends BaseAdminMulangController
 
         if ($model->pageSize > 0) {
             $model->orderBy = $model::$defaultOrderBy;
-            $model->page = $model->calcPage();//echo __METHOD__.": calcPage(id={$id},pageSize={$model->pageSize})={$model->page}<br>";exit;
+            $model->page = $model->calcPage();
         }
         return $this->render('view', [
             'model' => $model,
@@ -144,7 +144,7 @@ class AdminController extends BaseAdminMulangController
             $model->parent_id = $parent;
         }
         $post = Yii::$app->request->post();
-        $loaded = $model->load($post);//var_dump($loaded);var_dump($model->attributes);exit;
+        $loaded = $model->load($post);
 
         if ($loaded && $model->save()) {
             if ($model->aftersave != $model::AFTERSAVE_LIST) {
@@ -193,11 +193,11 @@ class AdminController extends BaseAdminMulangController
         }
 
         $post = Yii::$app->request->post();
-        $loaded = $model->load($post);//var_dump($model->attributes);exit;
+        $loaded = $model->load($post);
 
         $attributes = $model->attributes;
         if (!$this->canAuthorEditOwnVisibleArticle) unset($attributes['is_visible']);
-        $attributeNames = array_keys($attributes);//var_dump($attributeNames);exit;
+        $attributeNames = array_keys($attributes);
 
         if ($loaded && $model->save(true, $attributeNames)) {
             if ($model->aftersave != $model::AFTERSAVE_LIST) {
@@ -213,6 +213,8 @@ class AdminController extends BaseAdminMulangController
                 ]);
             }
         } else {
+// after $model->save() was cleared static cache $model::$_i18n and loaded data lost for this model
+//$model->load($post); // repeat once more
             return $this->render('update', [
                 'model' => $model,
             ]);
@@ -275,8 +277,8 @@ class AdminController extends BaseAdminMulangController
     }
 
     public function actionShift($direction, $id)
-    {//echo __METHOD__."($direction,$id)";
-        $params = Yii::$app->request->queryParams;//var_dump($params);
+    {
+        $params = Yii::$app->request->queryParams;
         $page   = empty($params['page']) ? 1 : $params['page'];
         $sort   = empty($params['sort']) ? 'prio' : $params['sort'];
         //$parent = empty($params['parent']) ? 0 : $params['parent'];

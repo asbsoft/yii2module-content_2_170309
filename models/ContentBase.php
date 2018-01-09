@@ -95,7 +95,7 @@ class ContentBase extends DataModel
         $this->langHelper = new $this->module->langHelper;
         $param = 'editAllLanguages';
         $editAllLanguages = empty($this->module->params[$param]) ? false : $this->module->params[$param];
-        $this->languages = $this->langHelper->activeLanguages($editAllLanguages);//var_dump($this->languages);
+        $this->languages = $this->langHelper->activeLanguages($editAllLanguages);
         if (empty($this->langCodeMain) ) {
             $this->langCodeMain = $this->langHelper->normalizeLangCode(Yii::$app->language);
         }
@@ -167,7 +167,7 @@ class ContentBase extends DataModel
         return $subdir;
     }
 
-    /** Array of i18n-models in format [ langCode => i18n-model ] */
+    /** Array of i18n-models in format [id][langCode] => i18n-model */
     protected static $_i18n = [];
     /**
      * Declares a `has-many` relation.
@@ -201,8 +201,8 @@ class ContentBase extends DataModel
      * @return array in format langCode => i18n-model's object
      */
     public function prepareI18nModels()
-    {//echo __METHOD__;var_dump($this->attributes);
-        $mI18n = $this->getJoined()->all();//var_dump($mI18n);exit;
+    {
+        $mI18n = $this->getJoined()->all();
         $modelsI18n = [];
         foreach ($mI18n as $modelI18n) {
             $modelI18n->correctSelectedText();
@@ -214,7 +214,7 @@ class ContentBase extends DataModel
                 $modelsI18n[$langCode] = $newI18n->loadDefaultValues();
                 $modelsI18n[$langCode]->lang_code = $langCode;
             }
-        }//var_dump($modelsI18n);exit;
+        }
         return $modelsI18n;
     }
 
@@ -223,19 +223,19 @@ class ContentBase extends DataModel
      * @return boolean whether `load()` found the expected form in `$data`.
      */
     public function load($data, $formName = null)
-    {//echo __METHOD__;var_dump($data);
-        $result = parent::load($data, $formName);//var_dump($result);var_dump($this->attributes);
+    {
+        $result = parent::load($data, $formName);
         if ($result) {
             $i18nFormName = $this->module->model(static::I18N_JOIN_MODEL)->formName();
             foreach ($this->languages as $langCode => $lang) {
                 if (!empty($data[$i18nFormName][$langCode])) {
-                    $i18nResult = $this->i18n[$langCode]->load($data[$i18nFormName][$langCode], '');//var_dump($i18nResult);var_dump($this->i18n[$langCode]->attributes);
+                    $i18nResult = $this->i18n[$langCode]->load($data[$i18nFormName][$langCode], '');
                     if (!$i18nResult) {
                         $result = false;
                     }
                 }
             }
-        }//var_dump($result);//exit;
+        }
         return $result;
     }
 
@@ -250,8 +250,8 @@ class ContentBase extends DataModel
     public function validate($attributeNames = null, $clearErrors = true)
     {
         if ($clearErrors) $this->errorLang = null;
-        
-        $result = parent::validate($attributeNames, $clearErrors);//var_dump($result);var_dump($this->errors);
+
+        $result = parent::validate($attributeNames, $clearErrors);
 
         if ($this instanceof ContentSearch) return $result;
         
@@ -275,7 +275,7 @@ class ContentBase extends DataModel
         // Joined primary key value among i18n-attributes can't set before create main record.
         // Unset it to avoid validation error. But this attribute will (re)set in $this->save().
         //$attributeNames = $this->module->model(static::I18N_JOIN_MODEL)->activeAttributes();
-        //unset($attributeNames[array_search(static::I18N_JOIN_PRIM_KEY, $attributeNames)]);//var_dump($attributeNames);
+        //unset($attributeNames[array_search(static::I18N_JOIN_PRIM_KEY, $attributeNames)]);
         //!! simple add to modelI18n::rules(): ['content_id', 'safe'] and delete other content_id-rules
 
         $eitherValidation = false;
@@ -284,17 +284,17 @@ class ContentBase extends DataModel
             if (!empty($this->i18n[$langCode]->text))  $eitherValidation = true;
 
             //$i18nResult = $this->i18n[$langCode]->validate($attributeNames, $clearErrors);
-            $i18nResult = $this->i18n[$langCode]->validate(null, $clearErrors);//var_dump($i18nResult);var_dump($this->i18n[$langCode]->errors);
+            $i18nResult = $this->i18n[$langCode]->validate(null, $clearErrors);
             if (!$i18nResult) {
                 $result = false;
                 $this->errorLang = $langCode;
             }
-        }//var_dump($eitherValidation);
+        }
 
         if (!$eitherValidation) {
             Yii::$app->session->setFlash('error', Yii::t($this->tcModule, 'At least one title or text field must be fill'));
             $result = false;
-        }//var_dump($result);var_dump($this->errors);//exit;
+        }
 
         return $result;
     }
@@ -316,8 +316,6 @@ class ContentBase extends DataModel
             $this->prio = intval($maxPrio) + 1;
         }
 
-        //echo __METHOD__;var_dump($this->attributes);exit;
-
         return parent::beforeSave($insert);
     }
 
@@ -334,8 +332,8 @@ class ContentBase extends DataModel
         $transaction = static::getDb()->beginTransaction();
         $i18n = $this->i18n; // on create $this->i18n will change after save main model because will change $this->id from null
         try {
-            $result = parent::save($runValidation, $attributeNames);//var_dump($result);var_dump($this->errors);
-            if ($result) {//var_dump($this->id);exit;
+            $result = parent::save($runValidation, $attributeNames);
+            if ($result) {
                 // save multilang models
                 foreach ($this->languages as $langCode => $lang) {
                     $modelI18n = $i18n[$langCode];
@@ -343,7 +341,7 @@ class ContentBase extends DataModel
                     $modelI18n->$joinKey = $this->id;
 
                     if ($modelI18n->hasData()) {
-                        $i18nResult = $modelI18n->save();//echo $langCode;var_dump($i18nResult);var_dump($modelI18n->errors);exit;
+                        $i18nResult = $modelI18n->save();
                         if (!$i18nResult) {
                             $result = false;
                         }
@@ -353,7 +351,7 @@ class ContentBase extends DataModel
                 }
             }
         } catch (Exception $e) {
-            $transaction->rollBack();//throw $e;
+            $transaction->rollBack(); // throw $e;
 
             $msg = Yii::t($this->tcModule, 'Saving unsuccessfull');
             $msgFull = Yii::t($this->tcModule, 'Saving unsuccessfull by the reason') . ': ' . $e->getMessage();
@@ -361,7 +359,7 @@ class ContentBase extends DataModel
             $showError = isset($this->module->params['showAdminSqlErrors']) && $this->module->params['showAdminSqlErrors'];
             Yii::$app->session->setFlash('error', $showError ? $msgFull : $msg);
             return false;
-        }//var_dump($result);var_dump($this->errors);//exit;
+        }
         if ($result) {
             $transaction->commit();
         }
@@ -387,7 +385,7 @@ class ContentBase extends DataModel
         $result = false;
         $transaction = static::getDb()->beginTransaction();
         try {
-            $modelsI18n = $this->i18n;//var_dump($modelsI18n);exit;
+            $modelsI18n = $this->i18n;
             $numRows = 0;
             $result = true;
             foreach ($modelsI18n as $modelI18n) {
@@ -419,20 +417,21 @@ class ContentBase extends DataModel
     /**
      * Delete uploaded files connected with the model.
      * @param integet $id model id
+     * Note that Yii2-advanced temblate has 2 web roots with uploads. Here delete only one.
+     * @see In demo application asbsoft/yii2-app_4_170405 uploads-folder is only one and out of any web roots.
      */
     protected function deleteFiles($id)
-    {//echo __METHOD__."($id)";
+    {
         $subdir = static::getImageSubdir($id);
         if (!empty($this->module->params['uploadsContentDir'])) {
-            $uploadsDir = Yii::getAlias($this->module->params['uploadsContentDir']) . '/' . $subdir;//var_dump($uploadsDir);
+            $uploadsDir = Yii::getAlias($this->module->params['uploadsContentDir']) . '/' . $subdir;
             //@FileHelper::removeDirectory($uploadsDir);
             rename($uploadsDir, $uploadsDir . '~remove~' . date('ymd~His') . '~');
         }
         if (array_key_exists('@webfilespath', Yii::$aliases) && !empty($this->module->params['filesSubpath'])) {
-            $webfilesDir = Yii::getAlias('@webfilespath') . '/' . $this->module->params['filesSubpath'] . '/' . $subdir;//var_dump($webfilesDir);
+            $webfilesDir = Yii::getAlias('@webfilespath') . '/' . $this->module->params['filesSubpath'] . '/' . $subdir;
             @FileHelper::removeDirectory($webfilesDir);
         }
-        //?! Yii2-advanced temblate has 2 web roots. Here delete only one.
     }
 
     /**
@@ -453,4 +452,5 @@ class ContentBase extends DataModel
         
         return parent::beforeValidate();
     }
+
 }
