@@ -69,45 +69,52 @@
         </ul>
         <div class="tab-content">
             <?php // multi-lang part - content
-              $moduleInfo = $model::checkModuleLink($model);
-              foreach ($languages as $langCode => $lang):
-                  $countryCode2 = strtolower(substr($langCode, 3, 2));
-                  $flag = '<span class="flag f16"><span class="flag ' . $countryCode2 . '" title="' . $lang->name_orig . '"></span></span>';
-                  $labels = $modelsI18n[$langCode]->attributeLabels();
-                  $modelI18n = $modelsI18n[$langCode];
+                $moduleInfo = $model::checkModuleLink($model);
+                foreach ($languages as $langCode => $lang):
+                    $countryCode2 = strtolower(substr($langCode, 3, 2));
+                    $flag = '<span class="flag f16"><span class="flag ' . $countryCode2 . '" title="' . $lang->name_orig . '"></span></span>';
+                    $labels = $modelsI18n[$langCode]->attributeLabels();
+                    $modelI18n = $modelsI18n[$langCode];
             ?>
-            <div id="tab-<?= $langCode ?>"
-                class="tab-pane <?php if ($activeTab == $langCode): ?>active<?php endif; ?>"
-            >
-                <p>
-                    <?php
-                    if ($moduleInfo && $moduleInfo['href']) {
-                        echo Html::a($moduleInfo['text'], $moduleInfo['href'], ['target' => '_blank']);
-                    } else {
-                        $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
-                        //if ($model->is_visible && ContentSearch::canShow($model, $modelI18n)) { //todo
-                        if ($model->is_visible && $lang->is_visible) {
-                            echo Html::a($link, $link, ['target' => '_blank']);
-                        } else {
-                            echo Yii::t($tc, 'Content invisible at frontend');
-                        }
-                    }
-                    ?>
-                </p>
-                <div class="content-example">
-                    <?php // show as it will show at frontend
-                        if (!$moduleInfo) {
-                            echo Yii::$app->runAction("{$moduleUid}/main/view", [
+                <div id="tab-<?= $langCode ?>" class="tab-pane <?php if ($activeTab == $langCode): ?>active<?php endif; ?>">
+                    <p>
+                        <span class="flag f16 згдд-дуае"><span class="flag <?= $countryCode2 ?>" title="<?= $lang->name_orig ?>"></span></span>
+                        <?php
+                            if (!empty($moduleInfo['text'])) {
+                                if (empty($moduleInfo['hrefs'][$langCode])) {
+                                    echo $moduleInfo['text'];
+                                } else {
+                                    // link to module
+                                    echo Html::a($moduleInfo['text'], $moduleInfo['hrefs'][$langCode], ['target' => '_blank']);
+                                }
+                            } else {
+                                $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
+                                //if ($model->is_visible && ContentSearch::canShow($model, $modelI18n)) { //todo
+                                if (!$lang->is_visible) {
+                                    echo Yii::t($tc, 'This language not show at frontend');
+                                }
+                                if (!$model->is_visible) {
+                                    echo Yii::t($tc, 'Content invisible at frontend');
+                                } else if (empty($model->i18n[$langCode]->text)) {
+                                    echo Yii::t($tc, 'No content to show');
+                                } else {
+                                    echo Html::a($link, $link, ['target' => '_blank']);
+                                }
+                            }
+                        ?>
+                    </p>
+                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->text)): ?>
+                    <div class="content-example">
+                        <?= Yii::$app->runAction("{$moduleUid}/main/view", [ // show as content page will display at frontend
                                 'id'       => $model->id,
                                 'strict'   => false,
                                 'langCode' => $langCode,
                                 'layout'   => false,
                                 'showEmptyContent' => true,
-                            ]);
-                        }
-                    ?>
+                            ]); ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
-            </div>
             <?php endforeach; ?>
         </div>
     </div>

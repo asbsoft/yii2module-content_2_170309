@@ -62,8 +62,11 @@ return array_merge($instruction, [
                         => 'Модератор не может создавать статьи',
     "When create new record you can't upload images in text editor. You can do this in update mode"
  => "При создании новой записи вы не сможете загружать изображения в текстовом редакторе. Вы сможете сделать это при редактировании",
+    'This language not show at frontend'
+                        => 'Этот язык не отображается на frontend',
     'Content invisible at frontend'
                         => 'Страница не отображается на frontend',
+    'No content to show'=> 'Нет контента для отображения',
 
 // models
     'ID'                => 'Ид',

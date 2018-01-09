@@ -306,13 +306,16 @@ class Content extends ContentBase
             } else {
                 $route = false; // unsupported route type
             }
-            $href = false; // unknown link to module's backend
+            $hrefs = false; // unknown link to module's backend 
             if ($route) {
-                $href = Url::toRoute(["/{$route}"]);
+                $hrefs = [];
+                foreach ($langHelper::activeLanguages($all = true) as $langCode => $lang) {
+                    $hrefs[$langCode] = Url::toRoute(["/{$route}", 'lang' => $langCode]);
+                }
             }
             $moduleInfo = [
                 'text' => Yii::t($module->tcModule, 'module'),
-                'href' => $href,
+                'hrefs' => $hrefs,
             ];
         }
         return $moduleInfo;
