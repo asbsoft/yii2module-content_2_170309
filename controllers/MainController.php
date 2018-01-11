@@ -164,7 +164,14 @@ class MainController extends BaseMultilangController
         }
 
         if (isset($node->i18n[$lang]->text)) {
-            $text = $node->i18n[$lang]->text;
+            if ($node->is_visible) {
+                $text = $node->i18n[$lang]->text;
+            } else {
+                $text = '';
+                $msg = __METHOD__ . ": for node id='{$contentId}' disable visibility.";
+                Yii::trace($msg);
+                return '';
+            }
         } else {
             $msg = __METHOD__ . ": for node id='{$contentId}', lang='$lang' not found text.";
             Yii::error($msg);
