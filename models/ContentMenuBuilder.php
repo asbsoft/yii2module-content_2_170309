@@ -4,6 +4,7 @@ namespace asb\yii2\modules\content_2_170309\models;
 
 use asb\yii2\modules\content_2_170309\Module;
 use asb\yii2\common_2_170212\web\RoutesBuilder;
+use asb\yii2\common_2_170212\i18n\LangHelper;
 
 use Yii;
 use yii\helpers\Url;
@@ -152,7 +153,11 @@ class ContentMenuBuilder
     {
         if (empty(static::$_langHelper)) {
             $module = Module::getModuleByClassname(Module::className());
-            static::$_langHelper = $module->langHelper;
+            if (!empty($module)) {
+                static::$_langHelper = $module->langHelper;
+            } else {
+                static::$_langHelper = LangHelper::className();
+            }
         }
         return static::$_langHelper;
     }
