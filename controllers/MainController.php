@@ -43,8 +43,8 @@ class MainController extends BaseMultilangController
      * Text will get some substitutions, at first '{{title}}' will change to content title (menu item).
      * @param integer $id content ID, default 0 - root
      * @param boolean $strict search regime:
-     *     if content not found and $strict = true throws exception
-     *     if content not found and $strict = false find first child with content
+     *     if content not found and $strict = true then throws exception
+     *     if content not found and $strict = false then find first child with content
      * @param string $langCode language code
      * @param boolean $layout show page with layout or render partial if false
      * @param boolean $showEmptyContent show without texts instead of exception
@@ -62,7 +62,10 @@ class MainController extends BaseMultilangController
         if (empty($langCode)) $langCode = $this->lang;
         $model = $this->findContent($id, !$strict, $showEmptyContent);
 
-        if (empty($model) || ($strict && empty($model->i18n[$langCode]->text))) {
+        if (empty($model)
+           || ($strict && empty($model->i18n[$langCode]->text))  // no text in strict regime (will not find text in first child(s))
+           || ($layout && $model->hasInvisibleParent())  // only text block, not content page
+        ) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         }
 

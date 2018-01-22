@@ -8,6 +8,7 @@
     use asb\yii2\modules\content_2_170309\models\ContentSearch;
 
     use asb\yii2\common_2_170212\assets\FlagAsset;
+   use yii\bootstrap\BootstrapAsset;
 
     use yii\helpers\Html;
     use yii\helpers\Url;
@@ -21,6 +22,7 @@
     $this->params['breadcrumbs'][] = ['label' => Yii::t($tc, 'Contents'), 'url' => ['index']];
     $this->params['breadcrumbs'][] = $this->title;
 
+    $assetsFlag = BootstrapAsset::register($this);
     $assetsFlag = FlagAsset::register($this);
     $assets = $this->context->module->registerAsset('AdminAsset', $this); // $assets = AdminAsset::register($this);
 
@@ -77,8 +79,9 @@
                     $modelI18n = $modelsI18n[$langCode];
             ?>
                 <div id="tab-<?= $langCode ?>" class="tab-pane <?php if ($activeTab == $langCode): ?>active<?php endif; ?>">
-                    <p>
-                        <span class="flag f16 згдд-дуае"><span class="flag <?= $countryCode2 ?>" title="<?= $lang->name_orig ?>"></span></span>
+                    <div class="cintent-comment">
+                        <div class="country-flag f32 pull-left"><span class="flag <?= $countryCode2 ?>" title="<?= $lang->name_orig ?>"></span></div>
+                        <div class="link-or-text">
                         <?php
                             if (!empty($moduleInfo['text'])) {
                                 if (empty($moduleInfo['hrefs'][$langCode])) {
@@ -97,12 +100,15 @@
                                     echo Yii::t($tc, 'Content invisible at frontend');
                                 } else if (empty($model->i18n[$langCode]->text)) {
                                     echo Yii::t($tc, 'No content to show');
+                                } else if ($model->hasInvisibleParent()) {
+                                    echo Yii::t($tc, 'For use as text block only because has invisible parent node');
                                 } else {
                                     echo Html::a($link, $link, ['target' => '_blank']);
                                 }
                             }
                         ?>
-                    </p>
+                        </div>
+                    </div>
                     <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->text)): ?>
                     <div class="content-example">
                         <?= Yii::$app->runAction("{$moduleUid}/main/view", [ // show as content page will display at frontend

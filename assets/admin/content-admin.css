@@ -73,3 +73,12 @@
 .modal-dialog {
     width: 80%;
 }
+
+.country-flag {
+    margin-right: 10px;
+}
+.link-or-text {
+    padding: 8px;
+    height: 36px;
+    vertical-align: middle;
+}

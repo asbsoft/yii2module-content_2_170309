@@ -67,6 +67,8 @@ return array_merge($instruction, [
     'Content invisible at frontend'
                         => 'Страница не отображается на frontend',
     'No content to show'=> 'Нет контента для отображения',
+    'For use as text block only because has invisible parent node'
+                        => 'Для использования только в виде текстового блока, так как имеет невидимый родительский узел',
 
 // models
     'ID'                => 'Ид',
