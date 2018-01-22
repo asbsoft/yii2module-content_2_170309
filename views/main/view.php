@@ -1,9 +1,12 @@
 <?php
 
-/* @var title */
-/* @var text */
+/* @var $title */
+/* @var $text */
+/* @var $useLayout */
 
-$this->title = $title;
+//if ($useLayout) {  // use as content-page
+    $this->title = $title;
+//}
 
 ?>
 <?= $text ?>

@@ -8,23 +8,25 @@
     use asb\yii2\modules\content_2_170309\models\ContentSearch;
 
     use asb\yii2\common_2_170212\assets\FlagAsset;
-   use yii\bootstrap\BootstrapAsset;
+    use yii\bootstrap\BootstrapAsset;
 
     use yii\helpers\Html;
     use yii\helpers\Url;
     use yii\widgets\DetailView;
 
 
-    $moduleUid = $this->context->module->uniqueId;
-    $tc = $this->context->tcModule;
-
-    $this->title = Yii::t($tc, 'Content #{id}', ['id' => $model->id]);
-    $this->params['breadcrumbs'][] = ['label' => Yii::t($tc, 'Contents'), 'url' => ['index']];
-    $this->params['breadcrumbs'][] = $this->title;
-
     $assetsFlag = BootstrapAsset::register($this);
     $assetsFlag = FlagAsset::register($this);
     $assets = $this->context->module->registerAsset('AdminAsset', $this); // $assets = AdminAsset::register($this);
+
+    $moduleUid = $this->context->module->uniqueId;
+    $tc = $this->context->tcModule;
+
+    $title = Yii::t($tc, 'Content #{id}', ['id' => $model->id]);
+    $this->params['breadcrumbs'][] = ['label' => Yii::t($tc, 'Contents'), 'url' => ['index']];
+    $this->params['breadcrumbs'][] = $title;
+
+    $this->title = Yii::t($tc, 'Adminer') . ' - ' . $title;
 
     $lh = $this->context->module->langHelper;
     $editAllLanguages = empty($this->context->module->params['editAllLanguages'])
@@ -34,10 +36,13 @@
     $activeTab = $this->context->langCodeMain;
     $actionViewUid = $this->context->module->uniqueId . '/main/view';
 
+    $slugPath = $model::getNodePath($model);
+
 ?>
 <div class="content-admin-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h2><?= Html::encode($this->title) ?></h2>
+    <h3><?= Html::encode($slugPath) ?></h3>
 
     <p>
         <?= Html::a(Yii::t('yii', 'Update'), ['update', 'id' => $model->id], ['class' => 'btn btn-primary']) ?>
@@ -91,8 +96,6 @@
                                     echo Html::a($moduleInfo['text'], $moduleInfo['hrefs'][$langCode], ['target' => '_blank']);
                                 }
                             } else {
-                                $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
-                                //if ($model->is_visible && ContentSearch::canShow($model, $modelI18n)) { //todo
                                 if (!$lang->is_visible) {
                                     echo Yii::t($tc, 'This language not show at frontend');
                                 }
@@ -103,22 +106,32 @@
                                 } else if ($model->hasInvisibleParent()) {
                                     echo Yii::t($tc, 'For use as text block only because has invisible parent node');
                                 } else {
+                                    $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
                                     echo Html::a($link, $link, ['target' => '_blank']);
                                 }
                             }
                         ?>
                         </div>
                     </div>
-                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->text)): ?>
-                    <div class="content-example">
-                        <?= Yii::$app->runAction("{$moduleUid}/main/view", [ // show as content page will display at frontend
-                                'id'       => $model->id,
-                                'strict'   => false,
-                                'langCode' => $langCode,
-                                'layout'   => false,
-                                'showEmptyContent' => true,
-                            ]); ?>
+                    <div class="h4 content-label">
+                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->title)): ?>
+                            <?= $model->i18n[$langCode]->title ?>
+                    <?php else: ?>
+                            <?= Yii::t($tc, '(no title)') ?>
+                    <?php endif; ?>
                     </div>
+                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->text)): ?>
+                        <div class="content-example">
+                            <?php $savedTitle = $this->title; ?>
+                            <?= Yii::$app->runAction("{$moduleUid}/main/view", [ // show as content page will display at frontend
+                                    'id'        => $model->id,
+                                    'strict'    => false,
+                                    'langCode'  => $langCode,
+                                    'useLayout' => false,
+                                    'showEmptyContent' => true,
+                                ]); ?>
+                            <?php $this->title = $savedTitle; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>

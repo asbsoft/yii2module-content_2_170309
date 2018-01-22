@@ -26,6 +26,7 @@ return array_merge($instruction, [
 
 // admin-views
     'Contents'          => 'Контент',
+    'Content #{id}'     => 'Контент #{id}',
     'Children for node' => 'Потомки узла',
     'Children for node not found'
                         => 'Потомки узла не найдены',
@@ -69,6 +70,7 @@ return array_merge($instruction, [
     'No content to show'=> 'Нет контента для отображения',
     'For use as text block only because has invisible parent node'
                         => 'Для использования только в виде текстового блока, так как имеет невидимый родительский узел',
+    '(no title)'        => '(без заголовка)',
 
 // models
     'ID'                => 'Ид',

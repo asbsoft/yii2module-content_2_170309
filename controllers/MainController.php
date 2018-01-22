@@ -46,12 +46,12 @@ class MainController extends BaseMultilangController
      *     if content not found and $strict = true then throws exception
      *     if content not found and $strict = false then find first child with content
      * @param string $langCode language code
-     * @param boolean $layout show page with layout or render partial if false
+     * @param boolean $useLayout show page with layout or render partial if false
      * @param boolean $showEmptyContent show without texts instead of exception
      * @return mixed
      * @throws NotFoundHttpException if content not found or unvisible
      */
-    public function actionView($id = 0, $strict = false, $langCode = null, $layout = true, $showEmptyContent = false)
+    public function actionView($id = 0, $strict = false, $langCode = null, $useLayout = true, $showEmptyContent = false)
     {
         $module = $this->module;
         if ($id == 0 && $module->params['useExternalStartPage'] && !empty($module::$savedDefaultRoute)) {
@@ -64,7 +64,7 @@ class MainController extends BaseMultilangController
 
         if (empty($model)
            || ($strict && empty($model->i18n[$langCode]->text))  // no text in strict regime (will not find text in first child(s))
-           || ($layout && $model->hasInvisibleParent())  // only text block, not content page
+           || ($useLayout && $model->hasInvisibleParent())  // only text block, not content page
         ) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         }
@@ -74,10 +74,11 @@ class MainController extends BaseMultilangController
         $text = TextProcessor::textPreprocess($model->i18n[$langCode]->text, $params);
 
         $data = [
-            'title' => $model->i18n[$langCode]->title,
-            'text' => $text,
+            'title'     => $model->i18n[$langCode]->title,
+            'text'      => $text,
+            'useLayout' => $useLayout,
         ];
-        if ($layout) {
+        if ($useLayout) {
             return $this->render('view', $data);
         } else {
             return $this->renderPartial('view', $data);
