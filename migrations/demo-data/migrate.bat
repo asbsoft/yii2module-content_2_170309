@@ -1,9 +1,9 @@
 @echo off
 
-set APP=../../../../../yii.bat
+set APP=../../../../../../yii.bat
 if exist %APP% goto START
 
-set APP=../../../../yii.bat
+set APP=../../../../../yii.bat
 if exist %APP% goto START
 
 echo Yii console bootstrap file not found

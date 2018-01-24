@@ -12,18 +12,24 @@ use yii\db\Expression;
 /**
  * @author Alexandr Belogolovsky <ab2014box@gmail.com>
  */
-class m170411_134500_content_startpage extends Migration
+class m180124_134501_content_page_intro extends Migration
 {
-    protected $adminUserId = 100; //!! tune
+    protected $adminUserId;
 
     protected $tableName;
     protected $tableNameI18n;
 
     protected $languages;
 
+    protected $lorem;
+
     public function init()
     {
         parent::init();
+
+        $config = require(__DIR__ . '/_config.php');
+        $this->adminUserId = $config['adminUserId'];
+        $this->lorem = $config['lorem'];
 
         $this->tableName     = Content::tableName();
         $this->tableNameI18n = ContentI18n::tableName();
@@ -36,7 +42,7 @@ class m170411_134500_content_startpage extends Migration
         $now = new Expression('NOW()');
         $this->insert($this->tableName, [
             'parent_id'   => 0,
-            'slug'        => 'home',
+            'slug'        => 'intro',
             'prio'        => 1,
             'is_visible'  => true,
             'owner_id'    => $this->adminUserId,
@@ -45,14 +51,17 @@ class m170411_134500_content_startpage extends Migration
         $contentId = $this->db->getLastInsertID();
 
         foreach ($this->languages as $language) {
+            $addText = ($language->code2 == 'ru' || $language->code2 == 'uk') ? $this->lorem['cyr'] : $this->lorem['eng'];
             $this->insert($this->tableNameI18n, [
                 'content_id' => $contentId,
                 'lang_code'  => $language->code_full,
-                'title'      => 'Start page in ' . $language->name_en,
-                'text'       => "<h1>Start page title in {$language->name_en} </h1>"
-                              . "<h2>({$language->name_orig})</h2>"
-                              . "<p>Hello world!</p><p>Change this to original text.</p>"
-                              . str_repeat("<p>Some text in {$language->name_orig}...</p>", 10),
+                'title'      => $language->name_en . ' introduction',
+                'text'       => "<h1>Introduction in {$language->name_en} ({$language->name_orig})</h1>"
+                              . "<p>Some text in {$language->name_orig}...</p>"
+                              . "<p>Change it to your original text.</p>"
+                              . "<p>{$addText['short']}</p>"
+                              . str_repeat("<p>{$addText['long']}</p>", 5)
+                              . "<p>Some text in {$language->name_orig}...</p>"
             ]);
         }
     }
