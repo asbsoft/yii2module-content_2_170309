@@ -14,6 +14,7 @@ use yii\db\Expression;
  */
 class m180124_134600_content_blocks_startpage extends Migration
 {
+    protected $prio = 90;  // check to not equal to such prio in another migrations
     protected $adminUserId;
 
     protected $tableName;
@@ -42,7 +43,7 @@ class m180124_134600_content_blocks_startpage extends Migration
         $this->insert($this->tableName, [
             'parent_id'   => 0,
             'slug'        => 'startpage-blocks',
-            'prio'        => 1,
+            'prio'        => $this->prio,
             'is_visible'  => false,  // it's not webpage, it is container of text-blocks
             'owner_id'    => $this->adminUserId,
             'create_time' => new Expression('NOW()'),

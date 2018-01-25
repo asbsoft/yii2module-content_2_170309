@@ -14,6 +14,8 @@ use yii\db\Expression;
  */
 class m180124_134502_content_page_about extends Migration
 {
+    protected $prio = 30;  // check to not equal to such prio in another migrations
+
     protected $adminUserId;
 
     protected $tableName;
@@ -43,7 +45,7 @@ class m180124_134502_content_page_about extends Migration
         $this->insert($this->tableName, [
             'parent_id'   => 0,
             'slug'        => 'about',
-            'prio'        => 1,
+            'prio'        => $this->prio,
             'is_visible'  => true,
             'owner_id'    => $this->adminUserId,
             'create_time' => $now,
