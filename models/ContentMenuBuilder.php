@@ -72,7 +72,7 @@ class ContentMenuBuilder
 
         $node = static::$_model->node($parentId);
         if (!empty($node->i18n[$lang]->title) && $node->is_visible) {
-            $url = static::createContentLink($node->id); // may be false if node has no text but only menu item title
+            $url = static::createContentLink($node->id, $node->slug); // may be false if node has no text but only menu item title
             if ($url === false) {
                 $url = static::checkRoutesLink($node);
             }
@@ -145,29 +145,35 @@ class ContentMenuBuilder
     /**
      * Create link for node.
      * @param integer $id
+     * @param string $slug
      * @return string|false
      */
-    protected static function createContentLink($id)
+    protected static function createContentLink($id, $slug)
     {
-        $url = Url::toRoute([static::$_routeAction, 'id' => $id]);
+        $url = Url::toRoute([static::$_routeActionView, 'id' => $id]);
         $parts = parse_url($url);
         if (!empty($parts['path'])) {
             $url = $parts['path'];
-            if (strstr($url, static::$_routeAction)) { // it's fake link contain action UID and GET-parameter "id={$id}"
+            if (strstr($url, static::$_routeActionView)) { // it's fake link contain action UID and GET-parameter "id={$id}"
                 $url = false;
             }
+        }
+        if ($url === false) {
+            $url = Url::toRoute([static::$_routeActionShow, 'id' => $id, 'slug' => $slug]);
         }
         return $url;
     }
 
-    protected static $_routeAction;
+    protected static $_routeActionView;
+    protected static $_routeActionShow;
     protected static $_model;
     protected static function _prepare()
     {
         if (empty(static::$_module)) {
             $module = Module::getModuleByClassname(Module::className());
             if (!empty($module)) {
-                static::$_routeAction = "/{$module->uniqueId}/main/view";
+                static::$_routeActionView = "/{$module->uniqueId}/main/view";
+                static::$_routeActionShow = "/{$module->uniqueId}/main/show";
                 static::$_model = $module::model(self::MODEL_ALIAS);
             }
         }

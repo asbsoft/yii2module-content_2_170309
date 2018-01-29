@@ -40,6 +40,19 @@ class MainController extends BaseMultilangController
 
     /**
      * Render content as a web page,
+     */
+    public function actionShow($id, $slug)
+    {
+        $model = $this->model->node($id);
+        if (empty($model) || !$model->is_visible || $model->slug != $slug) {
+            throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
+        }
+        
+        return $this->actionView($id, true, null, true, false, true);
+    }
+
+    /**
+     * Render content as a web page,
      * Text will get some substitutions, at first '{{title}}' will change to content title (menu item).
      * @param integer $id content ID, default 0 - root
      * @param boolean $strict search regime:
@@ -48,10 +61,12 @@ class MainController extends BaseMultilangController
      * @param string $langCode language code
      * @param boolean $useLayout show page with layout or render partial if false
      * @param boolean $showEmptyContent show without texts instead of exception
+     * @param boolean $ignoreParent if false 
      * @return mixed
      * @throws NotFoundHttpException if content not found or unvisible
      */
-    public function actionView($id = 0, $strict = false, $langCode = null, $useLayout = true, $showEmptyContent = false)
+    public function actionView($id = 0,
+        $strict = false, $langCode = null, $useLayout = true, $showEmptyContent = false, $ignoreParent = false)
     {
         $module = $this->module;
         if ($id == 0 && $module->params['useExternalStartPage'] && !empty($module::$savedDefaultRoute)) {
@@ -59,12 +74,14 @@ class MainController extends BaseMultilangController
             return Yii::$app->runAction($action);
         }
         
-        if (empty($langCode)) $langCode = $this->lang;
+        if (empty($langCode)) {
+            $langCode = $this->lang;
+        }
         $model = $this->findContent($id, !$strict, $showEmptyContent);
 
         if (empty($model)
            || ($strict && empty($model->i18n[$langCode]->text))  // no text in strict regime (will not find text in first child(s))
-           || ($useLayout && $model->hasInvisibleParent())  // only text block, not content page
+           || ($useLayout && !$ignoreParent && $model->hasInvisibleParent())  // if content page has invisible parent
         ) {
             throw new NotFoundHttpException(Yii::t($this->tcModule, 'Content not found'));
         }

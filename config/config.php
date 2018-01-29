@@ -4,9 +4,9 @@ use asb\yii2\common_2_170212\base\UniApplication;
 use asb\yii2\common_2_170212\i18n\LangHelper;
 use asb\yii2\common_2_170212\helpers\EditorContentHelper;
 
-$adminUrlPrefix = empty(Yii::$app->params['adminPath']) ? '' : Yii::$app->params['adminPath'] . '/';//var_dump($adminUrlPrefix);
+$adminUrlPrefix = empty(Yii::$app->params['adminPath']) ? '' : Yii::$app->params['adminPath'] . '/';
 
-$type = empty(Yii::$app->type) ? false : Yii::$app->type;//var_dump($type);exit;
+$type = empty(Yii::$app->type) ? false : Yii::$app->type;
 
 return [
 /*
@@ -42,12 +42,10 @@ return [
 
     /** Routes config(s) */
     'routesConfig' => [ // default: type => prefix|[config]
-/*
         'main'  => $type == UniApplication::APP_TYPE_BACKEND  ? false : [
             'urlPrefix' => '',
             'append' => true,
         ],
-*/
         'admin' => $type == UniApplication::APP_TYPE_FRONTEND ? false : [
             'urlPrefix' => $adminUrlPrefix . 'content',
             'startLink' => [
