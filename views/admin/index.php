@@ -108,30 +108,35 @@
         <div class="col-xs-3 text-nowrap text-right">
             <?php
                 if (!empty($parentModel)) {
-                    $options = $this->params['buttonOptions'];
-
                   // change visible
                     $icon = $parentModel->is_visible ? 'ok' : 'minus';
                     $doubt = '';
                     if ($parentModel->is_visible && $parentModel->hasInvisibleParent()) {
                         $doubt = '?';
                     }
+                    $options = $this->params['buttonOptions'];
                     $options['title'] = ($parentModel->is_visible ? Yii::t($tc, 'Hide') : Yii::t($tc, 'Show')) . " #{$parentId}";
+                    $options['data']['method'] = 'post';
+                    $options['data']['confirm'] = Yii::t($tc, 'Are you sure to change visibility of this item?');
+
                     $url = Url::to(['change-visible', 'id' => $parentId]);
                     echo Html::a("<span class='glyphicon glyphicon-{$icon} btn'><sup>$doubt</sup></span>", $url, $options);
 
                   // view
+                    $options = $this->params['buttonOptions'];
                     $options['title'] = Yii::t($tc, 'View') . " #{$parentId}";
                     $url = Url::to(['view', 'id' => $parentId]);
                     echo Html::a("<span class='glyphicon glyphicon-eye-open btn'></span>", $url, $options);
 
                   // edit
+                    $options = $this->params['buttonOptions'];
                     $options['title'] = Yii::t($tc, 'Edit') . " #{$parentId}";
                     $url = Url::to(['update', 'id' => $parentId]);
                     echo Html::a("<span class='glyphicon glyphicon-pencil btn'></span>", $url, $options);
                 
                   // delete
                   if (!$parentModel->hasChildren()) {
+                    $options = $this->params['buttonOptions'];
                     $options = ArrayHelper::merge([
                         'title' => Yii::t($tc, 'Delete') . " #{$parentId}",
                         'data' => [
