@@ -8,6 +8,7 @@ use asb\yii2\common_2_170212\i18n\LangHelper;
 
 use Yii;
 use yii\helpers\Url;
+use yii\base\InvalidParamException;
 
 /**
  * @author Alexandr Belogolovsky <ab2014box@gmail.com>
@@ -22,8 +23,35 @@ class ContentMenuBuilder
      */
     public static function rootMenuItems()
     {
-        $menuItems = static::menuItems(0);//echo __METHOD__;var_dump($menuItems);exit;
-        return $menuItems;
+        return static::submenuItems('/');
+    }
+
+    /**
+     * @param string $nodePath path to root of submenu in content nodes tree, format '/menus/custom-layout/left-menu'
+     * @return array of submenu items in yii\bootstrap\Nav widget format
+     */
+    public static function submenuItems($nodePath = '/')
+    {
+        static::_prepare();
+        $model = static::$_model;
+
+        if (trim($nodePath, '/') === '') {
+            $id = 0;  // root of tree
+        } else {
+            $id = $model::getIdBySlugPath($nodePath);
+            if ($id === false) {
+                $msg = "Illegal node path '$nodePath' to submenu in content tree";
+                Yii::error($msg);
+                throw new InvalidParamException($msg);
+            }
+        }
+        $menuItems = static::menuItems($id);
+
+        if (empty($menuItems['items'])) {
+            return $menuItems;
+        } else {
+            return $menuItems['items'];
+        }
     }
 
     /**
@@ -38,6 +66,7 @@ class ContentMenuBuilder
         if (empty(static::$_model)) {
             $msg = "Can't find model/module for build menu in " . __METHOD__;
             Yii::error($msg);
+          //throw new InvalidParamException($msg);
             return $menuItems;
         }
 
@@ -45,22 +74,24 @@ class ContentMenuBuilder
         if (!empty($node->i18n[$lang]->title) && $node->is_visible) {
             $url = static::createContentLink($node->id); // may be false if node has no text but only menu item title
             if ($url === false) {
-                $url = static::checkRoutesLink($node);//echo'found@routes:';var_dump($url);
+                $url = static::checkRoutesLink($node);
             }
             $parentMenuItem = [
                 'label' => $node->i18n[$lang]->title,
                 'url' => $url,
-            ];//echo"parentMenuItem:#{$node->id}:url='$url'<br>";
+            ];
         }
 
         $children = static::$_model->nodeChildren($parentId);
         $submenuItems = [];
-        foreach ($children as $child) {//var_dump($child->attributes);
+        foreach ($children as $child) {
             if (!empty($child->i18n[$lang]->title) && $child->is_visible) {
                 $tmpItems = static::menuItems($child->id);
-                if (!empty($tmpItems)) $submenuItems[] = $tmpItems;
+                if (!empty($tmpItems)) {
+                    $submenuItems[] = $tmpItems;
+                }
             }
-        }//echo __METHOD__."($parentId): submenuItems:";var_dump($submenuItems);
+        }
         
         if (empty($parentMenuItem)) {
             $menuItems = $submenuItems;
@@ -75,9 +106,9 @@ class ContentMenuBuilder
             $menuItems = [
                 'label' => $parentMenuItem['label'],
                 'items' => $submenuItems,
-                'dropDownOptions' => ['class' => 'dropdown-menu'], //!! v.2.0.10
+                'dropDownOptions' => ['class' => 'dropdown-menu'], // need for v.2.0.10+
             ];
-        }//echo __METHOD__."($parentId): menuItems:";var_dump($menuItems);
+        }
 
         return $menuItems;
     }
@@ -89,8 +120,8 @@ class ContentMenuBuilder
      * @return string|false
      */
     protected static function checkRoutesLink($node)
-    {//echo __METHOD__."({$node->id})<br>";
-        $nodeLink = static::$_model->getNodePath($node);//var_dump($nodeLink);
+    {
+        $nodeLink = static::$_model->getNodePath($node);
 
         // find route 
         $result = false;
@@ -107,7 +138,7 @@ class ContentMenuBuilder
                 $lang = $lh::getLangCode2(static::language());
                 $result = '/' . $lang . '/' . $nodeLink;
             }
-        }//var_dump($result);exit;
+        }
         return $result;
     }
 
@@ -118,32 +149,26 @@ class ContentMenuBuilder
      */
     protected static function createContentLink($id)
     {
-        $url = Url::toRoute([static::$_routeAction, 'id' => $id]);//var_dump($url);
-        $parts = parse_url($url);//var_dump($parts);
+        $url = Url::toRoute([static::$_routeAction, 'id' => $id]);
+        $parts = parse_url($url);
         if (!empty($parts['path'])) {
             $url = $parts['path'];
             if (strstr($url, static::$_routeAction)) { // it's fake link contain action UID and GET-parameter "id={$id}"
                 $url = false;
             }
-        }//var_dump($url);//exit;
+        }
         return $url;
     }
 
-    //protected static $_module;
     protected static $_routeAction;
     protected static $_model;
-    //protected static $_langHelper;
-    //protected static $_langCodeMain;
     protected static function _prepare()
     {
         if (empty(static::$_module)) {
             $module = Module::getModuleByClassname(Module::className());
             if (!empty($module)) {
                 static::$_routeAction = "/{$module->uniqueId}/main/view";
-                //static::$_module = $module;
                 static::$_model = $module::model(self::MODEL_ALIAS);
-                //static::$_langHelper = new $module->langHelper;
-                //static::$_langCodeMain = static::$_langHelper->normalizeLangCode(Yii::$app->language);
             }
         }
     }
