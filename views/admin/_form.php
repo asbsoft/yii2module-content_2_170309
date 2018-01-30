@@ -119,6 +119,12 @@
 
         <br style="clear:both" />
 
+        <div class="col-md-10">
+            <?= $form->field($model, 'route')->textInput(['maxlength' => true]) ?>
+        </div>
+
+        <br style="clear:both" />
+
         <div class="tabbable content-multilang">
             <ul class="nav nav-tabs">
                 <?php // multi-lang part - tabs

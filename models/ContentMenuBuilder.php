@@ -9,6 +9,9 @@ use asb\yii2\common_2_170212\i18n\LangHelper;
 use Yii;
 use yii\helpers\Url;
 use yii\base\InvalidParamException;
+//use yii\base\ErrorException;
+
+use Exception;
 
 /**
  * @author Alexandr Belogolovsky <ab2014box@gmail.com>
@@ -17,6 +20,24 @@ class ContentMenuBuilder
 {
     const MODEL_ALIAS      = 'Content';
     const MODEL_I18N_ALIAS = 'ContentI18n';
+
+    protected static $_sysControllerUid;
+    protected static $_routeActionView;
+    protected static $_routeActionShow;
+    protected static $_model;
+    /** Init usable vars */
+    protected static function _prepare()
+    {
+        if (empty(static::$_module)) {
+            $module = Module::getModuleByClassname(Module::className());
+            if (!empty($module)) {
+                static::$_sysControllerUid = "/sys/main";
+                static::$_routeActionView = "/{$module->uniqueId}/main/view";
+                static::$_routeActionShow = "/{$module->uniqueId}/main/show";
+                static::$_model = $module::model(self::MODEL_ALIAS);
+            }
+        }
+    }
     
     /**
      * @return array of all menu items in yii\bootstrap\Nav widget format
@@ -72,7 +93,7 @@ class ContentMenuBuilder
 
         $node = static::$_model->node($parentId);
         if (!empty($node->i18n[$lang]->title) && $node->is_visible) {
-            $url = static::createContentLink($node->id, $node->slug); // may be false if node has no text but only menu item title
+            $url = static::createContentLink($node); // may be false if node has no text but only menu item title
             if ($url === false) {
                 $url = static::checkRoutesLink($node);
             }
@@ -96,11 +117,11 @@ class ContentMenuBuilder
         if (empty($parentMenuItem)) {
             $menuItems = $submenuItems;
         } else if (empty($submenuItems)) {
-            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node)) {
+            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node) || !empty($node->route)) {
                 $menuItems = $parentMenuItem;
             }
         } else { // duplicate parent link in submenu
-            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node)) {
+            if (!empty($node->i18n[$lang]->text) || static::checkRoutesLink($node) || !empty($node->route)) {
                 array_unshift($submenuItems, $parentMenuItem);
             }
             $menuItems = [
@@ -144,39 +165,52 @@ class ContentMenuBuilder
 
     /**
      * Create link for node.
-     * @param integer $id
-     * @param string $slug
+     * @param Content $node
      * @return string|false
      */
-    protected static function createContentLink($id, $slug)
+    protected static function createContentLink($node)
     {
-        $url = Url::toRoute([static::$_routeActionView, 'id' => $id]);
-        $parts = parse_url($url);
-        if (!empty($parts['path'])) {
-            $url = $parts['path'];
-            if (strstr($url, static::$_routeActionView)) { // it's fake link contain action UID and GET-parameter "id={$id}"
+        static::_prepare();
+        $url = false;
+
+        // node with external link: get URL from 'route' field
+        if (empty($node->text) && !empty($node->route)) {
+            try {
+                $route = $node->route;
+                if (substr($route, 0, 1) == '[') {
+                    $route = @eval("return $route;");
+                } 
+                if ($route) {
+                    $url = Url::toRoute($route);
+                }
+            } catch (Exception $ex) {
+                $url = false;
+            }
+            $parts = parse_url($url);
+            $mainCtrlUid = Url::toRoute([static::$_sysControllerUid]);
+            if (0 === strpos($parts['path'], $mainCtrlUid)) {  // illegal link
                 $url = false;
             }
         }
-        if ($url === false) {
-            $url = Url::toRoute([static::$_routeActionShow, 'id' => $id, 'slug' => $slug]);
-        }
-        return $url;
-    }
 
-    protected static $_routeActionView;
-    protected static $_routeActionShow;
-    protected static $_model;
-    protected static function _prepare()
-    {
-        if (empty(static::$_module)) {
-            $module = Module::getModuleByClassname(Module::className());
-            if (!empty($module)) {
-                static::$_routeActionView = "/{$module->uniqueId}/main/view";
-                static::$_routeActionShow = "/{$module->uniqueId}/main/show";
-                static::$_model = $module::model(self::MODEL_ALIAS);
+        // site tree content node: create URL for node from visible site tree if this node has original route
+        if ($url === false) {
+            $url = Url::toRoute([static::$_routeActionView, 'id' => $node->id]);
+            $parts = parse_url($url);
+            if (!empty($parts['path'])) {
+                $url = $parts['path'];
+                if (strstr($url, static::$_routeActionView)) { // it's fake link contain action UID and GET-parameter "id={$id}"
+                    $url = false;
+                }
             }
         }
+
+        // node has content but any links yet: create URL for node out of visible site tree (submenu tree)
+        if ($url === false && empty($node->route) && !empty($node->text)) {
+            $url = Url::toRoute([static::$_routeActionShow, 'id' => $node->id, 'slug' => $node->slug]);
+        }
+
+        return $url;
     }
 
     protected static $_langHelper;

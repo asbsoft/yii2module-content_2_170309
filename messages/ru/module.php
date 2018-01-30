@@ -76,6 +76,7 @@ return array_merge($instruction, [
     'ID'                => 'Ид',
     'Parent'            => 'Предок',
     'Alias / URL part'  => 'Псевдоним / Часть линка',
+    'Link / Route'      => 'Линк / Роут',
     'Visible'           => 'Видимость',
     'Author'            => 'Автор',
     'Menu item / Title' => 'Пункт меню / Заголовок',
@@ -84,6 +85,8 @@ return array_merge($instruction, [
                         => 'Только маленькие латинские буквы, цифры и дефис',
     'Such slug (alias) already exists for this parent'
                         => 'Эта часть линка/псевдоним уже существует для этого предка',
+    "Link must begin with slash '/'"
+                        => "Линк должен начинаться с '/'",
     "Can't delete node with children"
                         => 'Невозможно удалить узел с потомками',
     'Deletion unsuccessfull by the reason'

@@ -26,6 +26,7 @@ use Exception;
  * @property integer $id
  * @property integer $parent_id
  * @property string  $slug
+ * @property string  $route
  * @property integer $is_visible
  * @property integer $owner_id
  * @property string  $create_time
@@ -121,13 +122,24 @@ class ContentBase extends DataModel
                 return $value;
             }],
             ['slug', 'match', 'pattern' => '/^[a-z0-9\-]+$/',
-                    'message' => Yii::t($this->tcModule, 'Only small latin letters, digits and hyphen')
+                'message' => Yii::t($this->tcModule, 'Only small latin letters, digits and hyphen')
             ],
             ['slug', 'unique',
                 'targetAttribute' => ['parent_id', 'slug'],
                 'message' => Yii::t($this->tcModule, 'Such slug (alias) already exists for this parent')
             ],
 
+            ['route', 'string', 'max' => 255],
+
+          //['route', 'match', 'pattern' => '/^[\/|\[]|(\[\s*[\'\"])/',
+            ['route', 'match', 'pattern' => '/^[\/|\[]/',
+                'message' => Yii::t($this->tcModule, "Link must begin with slash '/'")
+            ]
+/*
+            ['route', 'match', 'pattern' => '/^[a-z0-9\-\/]+$/',
+                'message' => Yii::t($this->tcModule, 'Only small latin letters, digits, hyphen and slash')
+            ]
+*/
         ];
     }
 
@@ -140,6 +152,7 @@ class ContentBase extends DataModel
             'id' => Yii::t($this->tcModule, 'ID'),
             'parent_id' => Yii::t($this->tcModule, 'Parent'),
             'slug' => Yii::t($this->tcModule, 'Alias / URL part'),
+            'route' => Yii::t($this->tcModule, 'Link / Route'),
             'is_visible' => Yii::t($this->tcModule, 'Visible'),
             'owner_id' => Yii::t($this->tcModule, 'Author'),
             'create_time' => Yii::t($this->tcModule, 'Create Time'),
