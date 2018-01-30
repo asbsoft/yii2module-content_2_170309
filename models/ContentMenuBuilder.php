@@ -63,7 +63,8 @@ class ContentMenuBuilder
             if ($id === false) {
                 $msg = "Illegal node path '$nodePath' to submenu in content tree";
                 Yii::error($msg);
-                throw new InvalidParamException($msg);
+              //throw new InvalidParamException($msg);
+                return [];
             }
         }
         $menuItems = static::menuItems($id);
