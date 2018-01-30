@@ -132,8 +132,9 @@ class ContentBase extends DataModel
             ['route', 'string', 'max' => 255],
 
           //['route', 'match', 'pattern' => '/^[\/|\[]|(\[\s*[\'\"])/',
-            ['route', 'match', 'pattern' => '/^[\/|\[]/',
-                'message' => Yii::t($this->tcModule, "Link must begin with slash '/'")
+            ['route', 'match', 'pattern' => '/^[\/|\[|=]/',
+                'message' => Yii::t($this->tcModule, "Link must begin with slash '/' or '=' for external link")
+              //'message' => Yii::t($this->tcModule, "Link must begin with slash '/' or '=' or has route syntax")
             ]
 /*
             ['route', 'match', 'pattern' => '/^[a-z0-9\-\/]+$/',

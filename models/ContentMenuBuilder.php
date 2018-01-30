@@ -173,23 +173,28 @@ class ContentMenuBuilder
         static::_prepare();
         $url = false;
 
-        // node with external link: get URL from 'route' field
+        // node with external/internal link: get URL from 'route' field
         if (empty($node->text) && !empty($node->route)) {
-            try {
-                $route = $node->route;
-                if (substr($route, 0, 1) == '[') {
-                    $route = @eval("return $route;");
-                } 
-                if ($route) {
-                    $url = Url::toRoute($route);
+            if (substr($node->route, 0, 1) == '=') {  // external link begin with '='
+                $url = trim(substr($node->route, 1));
+                //$url = urlencode($url);
+            } else {
+                try {
+                    $route = $node->route;
+                    if (substr($route, 0, 1) == '[') {  // route array syntax
+                        $route = @eval("return $route;"); // convert string array definition to array
+                    } 
+                    if ($route) {
+                        $url = Url::toRoute($route);
+                    }
+                } catch (Exception $ex) {
+                    $url = false;
                 }
-            } catch (Exception $ex) {
-                $url = false;
-            }
-            $parts = parse_url($url);
-            $mainCtrlUid = Url::toRoute([static::$_sysControllerUid]);
-            if (0 === strpos($parts['path'], $mainCtrlUid)) {  // illegal link
-                $url = false;
+                $parts = parse_url($url);
+                $mainCtrlUid = Url::toRoute([static::$_sysControllerUid]);
+                if (0 === strpos($parts['path'], $mainCtrlUid)) {  // illegal link
+                    $url = false;
+                }
             }
         }
 

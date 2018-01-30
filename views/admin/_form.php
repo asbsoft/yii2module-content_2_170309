@@ -17,6 +17,11 @@
 
     $assetsFlag = FlagAsset::register($this);
     $assets = $this->context->module->registerAsset('AdminAsset', $this); // inherited
+   
+    $tc = $this->context->tcModule;
+
+    $routeHintText = Yii::t($tc, "Enter internal link here in format '/path/to/content' (without language prefix)")
+                   . Yii::t($tc, " or external link with leading '=', for example: '= https://google.com'");
 
     // defaults
     if (empty($heightEditor)) $heightEditor = 240; //px
@@ -29,9 +34,9 @@
         }
     }
 
-    if (empty($model->owner_id)) $model->owner_id = Yii::$app->user->id;
-   
-    $tc = $this->context->tcModule;
+    if (empty($model->owner_id)) {
+        $model->owner_id = Yii::$app->user->id;
+    }
 
     $userIdentity = $this->context->module->userIdentity;
     $usersNamesList = method_exists($userIdentity, 'usersNames') ? $userIdentity::usersNames() : false;
@@ -120,7 +125,8 @@
         <br style="clear:both" />
 
         <div class="col-md-10">
-            <?= $form->field($model, 'route')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'route')->textInput(['maxlength' => true])
+                ->hint(Yii::t($tc, $routeHintText)) ?>
         </div>
 
         <br style="clear:both" />

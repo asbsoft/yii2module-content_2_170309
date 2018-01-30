@@ -87,6 +87,14 @@ return array_merge($instruction, [
                         => 'Эта часть линка/псевдоним уже существует для этого предка',
     "Link must begin with slash '/'"
                         => "Линк должен начинаться с '/'",
+    "Link must begin with slash '/' or '=' for external link"
+                        => "Линк должен начинаться с '/' или '=' для внешних ссылок",
+    "Link must begin with slash '/' or '=' or has route syntax"
+                        => "",
+    "Enter internal link here in format '/path/to/content' (without language prefix)"
+                        => "Введите здесь внутреннюю ссылку в формате '/path/to/content' (без языкового префикса)",
+    " or external link with leading '=', for example: '= https://google.com'"
+                        => " или внешнюю ссылку с предшествующим '=', например: '= https://google.com'",
     "Can't delete node with children"
                         => 'Невозможно удалить узел с потомками',
     'Deletion unsuccessfull by the reason'
