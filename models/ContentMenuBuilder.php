@@ -9,7 +9,6 @@ use asb\yii2\common_2_170212\i18n\LangHelper;
 use Yii;
 use yii\helpers\Url;
 use yii\base\InvalidParamException;
-//use yii\base\ErrorException;
 
 use Exception;
 
@@ -176,27 +175,7 @@ class ContentMenuBuilder
 
         // node with external/internal link: get URL from 'route' field
         if (empty($node->text) && !empty($node->route)) {
-            if (substr($node->route, 0, 1) == '=') {  // external link begin with '='
-                $url = trim(substr($node->route, 1));
-                //$url = urlencode($url);
-            } else {
-                try {
-                    $route = $node->route;
-                    if (substr($route, 0, 1) == '[') {  // route array syntax
-                        $route = @eval("return $route;"); // convert string array definition to array
-                    } 
-                    if ($route) {
-                        $url = Url::toRoute($route);
-                    }
-                } catch (Exception $ex) {
-                    $url = false;
-                }
-                $parts = parse_url($url);
-                $mainCtrlUid = Url::toRoute([static::$_sysControllerUid]);
-                if (0 === strpos($parts['path'], $mainCtrlUid)) {  // illegal link
-                    $url = false;
-                }
-            }
+            $url = static::routeToLink($node->route);
         }
 
         // site tree content node: create URL for node from visible site tree if this node has original route
@@ -217,6 +196,108 @@ class ContentMenuBuilder
         }
 
         return $url;
+    }
+
+    /**
+     * Convert route to link.
+     * @param string $strRoute string representation of route in PHP5.4+ []-notation
+     * @param string $ctrlLinkPrefix current controller links prefix
+     * @return string|false
+     */
+    public static function routeToLink($strRoute, $ctrlLinkPrefix = null)
+    {
+        if (empty($ctrlLinkPrefix)) {
+            static::_prepare();
+            $ctrlLinkPrefix = Url::toRoute([static::$_sysControllerUid]);
+        }
+        $strRoute = trim($strRoute);
+        $url = $route = false;
+        if (substr($strRoute, 0, 1) == '=') {  // external link begin with '='
+            $url = trim(substr($strRoute, 1));
+            //$url = urlencode($url);
+        } else {
+            if (substr($strRoute, 0, 1) == '[') {  // array-string
+                $route = static::convertRouteStrToArray($strRoute);  // convert string array definition to array
+            } elseif (substr($strRoute, 0, 1) == '/') {  // internal link
+                $route = $strRoute;
+            }
+            if (!$route) {
+                $url = false;
+            } else {
+                try {
+                    $url = Url::toRoute($route);
+                    $parts = parse_url($url);
+                    if (0 === strpos($parts['path'], $ctrlLinkPrefix)) {  // illegal link
+                        static::$errorRouteConvert = "Illegal link resolved";
+                        $url = false;
+                    }
+                } catch (InvalidParamException $ex) {
+                    static::$errorRouteConvert = $ex->getMessage();
+                    $url = false;
+                }
+            }
+        }
+        return $url;
+    }
+    public static $errorRouteConvert = '';
+    /**
+     * Convert string array definition to array.
+     * @param string $strRoute string representation of route
+     * @return array|false array representation of route or false on error
+     */
+    protected static function convertRouteStrToArray($strRoute)
+    {
+/*
+        try {
+            $route = @eval("return $strRoute;"); // security problem
+        } catch (Exception $ex) {
+            return false;
+        }
+*/
+        $str = trim($strRoute);
+        if (substr($str, 0, 1) == '[' && substr($str, -1, 1) == ']') {
+            $str = trim($str, "[]");
+        } else {
+            static::$errorRouteConvert = "Array syntax: not found '[' or ']'";
+            return false;
+        }
+        $array = [];
+        $i = 0;
+        $parts = explode(',', $str);
+        foreach ($parts as $next) {
+            $element = explode("=>", $next);
+            if (is_array($element) && count($element) == 1) {
+                $val = trim($element[0]);
+                if ((substr($val, 0, 1) == '"' && substr($val, -1, 1) == '"')
+                 || (substr($val, 0, 1) == "'" && substr($val, -1, 1) == "'")
+                ) {
+                    $array[$i++] = trim($val, "\"'");
+                } else {
+                    static::$errorRouteConvert = "Array element syntax: '$val'";
+                    return false;
+                }
+            } elseif (is_array($element) && count($element) == 2) {
+                $key = trim($element[0]);
+                $val = trim($element[1]);
+                if (
+                    ((substr($key, 0, 1) == '"' && substr($key, -1, 1) == '"') ||
+                     (substr($key, 0, 1) == "'" && substr($key, -1, 1) == "'"))
+                 &&
+                    ((substr($val, 0, 1) == '"' && substr($val, -1, 1) == '"') ||
+                     (substr($val, 0, 1) == "'" && substr($val, -1, 1) == "'") ||
+                     is_numeric($val))
+                ) {
+                    $array[trim($key, "\"'")] = trim($val, "\"'");
+                } else {
+                    static::$errorRouteConvert = "Array element syntax: '$key => $val'";
+                    return false;
+                }
+            } else {
+                static::$errorRouteConvert = "Array element syntax";
+                return false;
+            }
+        }
+        return $array;
     }
 
     protected static $_langHelper;

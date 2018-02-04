@@ -20,7 +20,7 @@ $result = [
   //'show-tree/<active:\d+>'                                => 'admin/show-tree', // for runAction only
 
     'el-finder/<action:(connect|manager)>/<id:\d+>'         => 'el-finder/<action>',
-    '<action:(index|create)>'                               => 'admin/<action>',
+    '<action:(index|create|check-route)>'                   => 'admin/<action>',
 
   //'?'                                                     => 'admin/index', //!! no '' - never start routes from root
 ];

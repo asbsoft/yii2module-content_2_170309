@@ -35,8 +35,8 @@ return [
   //'canAuthorEditOwnVisibleArticle' => true,
 
     // Set TRUE to show in edit form all registered languages, not only visible
-    'editAllLanguages' => false,
-  //'editAllLanguages' => true,
+  //'editAllLanguages' => false,
+    'editAllLanguages' => true,
 
     // Show detail SQL-errors diagnostic if appear
     'showAdminSqlErrors' => true,

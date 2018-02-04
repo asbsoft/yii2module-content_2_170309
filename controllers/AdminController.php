@@ -5,8 +5,11 @@ namespace asb\yii2\modules\content_2_170309\controllers;
 use asb\yii2\modules\content_2_170309\models\Content;
 use asb\yii2\modules\content_2_170309\models\ContentI18n;
 use asb\yii2\modules\content_2_170309\models\ContentSearch;
+use asb\yii2\modules\content_2_170309\models\ContentMenuBuilder;
 
 use asb\yii2\common_2_170212\controllers\BaseAdminMulangController;
+use asb\yii2\common_2_170212\base\UniApplication;
+use asb\yii2\common_2_170212\base\UniModule;
 
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -14,6 +17,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 /**
  * AdminController implements the CRUD actions for Content model.
@@ -22,7 +26,10 @@ use yii\helpers\ArrayHelper;
 class AdminController extends BaseAdminMulangController
 {
     public $pageSizeAdmin = 20; // default
-    public $canAuthorEditOwnVisibleArticle = false; // dafault
+    public $canAuthorEditOwnVisibleArticle = false; // default
+
+    /** Model for getting frontend application */
+    public static $sysAppModel = 'ApplicationModel';
 
     /**
      * @inheritdoc
@@ -51,8 +58,9 @@ class AdminController extends BaseAdminMulangController
             ['allow' => true, 'actions' => ['change-visible', 'shift'], 'roles' => ['roleContentModerator']],
             ['allow' => true, 'actions' => ['create'], 'roles' => ['createContent']],
             ['allow' => true, 'actions' => ['delete'], 'roles' => ['deleteContent']],
-            ['allow' => true, 'actions' => ['update', 'show-tree']
-                , 'roles' => ['roleContentModerator', 'roleContentAuthor'] // + check Yii::$app->user->can('...', [...]) in actionUpdate()
+            ['allow' => true, 'actions' => ['update', 'show-tree', 'check-route']
+                , 'roles' => ['roleContentModerator', 'roleContentAuthor']
+                  // + (for actionUpdate) check Yii::$app->user->can('...', [...]) in actionUpdate()
             ],
         ];
         $behaviors = ArrayHelper::merge(parent::behaviors(), [
@@ -63,6 +71,7 @@ class AdminController extends BaseAdminMulangController
                     'change-visible' => ['POST'],
                     'shift' => ['POST'],
                     'delete' => ['POST'],
+                    'check-route' => ['POST'],
                 ],
             ],
         ]);
@@ -106,10 +115,7 @@ class AdminController extends BaseAdminMulangController
             $pager->page = $page - 1; //! from 0
         }
 
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
-        ]);
+        return $this->render('index', compact('dataProvider', 'searchModel'));
     }
 
     /**
@@ -126,10 +132,36 @@ class AdminController extends BaseAdminMulangController
             $model->orderBy = $model::$defaultOrderBy;
             $model->page = $model->calcPage();
         }
-        return $this->render('view', [
-            'model' => $model,
-            'modelsI18n' => $modelsI18n,
-        ]);
+
+        // build frontend links
+        $lh = $this->module->langHelper;
+        $editAllLanguages = empty($this->module->params['editAllLanguages'])
+                          ? false : $this->module->params['editAllLanguages'];
+        $languages = $lh::activeLanguages($editAllLanguages);
+        if (Yii::$app instanceof UniApplication && Yii::$app->type == UniApplication::APP_TYPE_BACKEND) {
+            $containerModule = $this->module->module;
+            if ($containerModule instanceof UniModule && array_key_exists(static::$sysAppModel, $containerModule->models)) {
+                $appModel = $containerModule::model(static::$sysAppModel);
+                $appFront = $appModel::initFrontendApplication();  // for backend application init separate frontend-application
+              //$appFront->urlManager->baseUrl = 'http://www.mysite.com';  // frontend domain - set from app-params
+            }
+        }
+        $moduleUid = $this->module->uniqueId;
+        foreach ($languages as $langCode => $lang) {
+            //$frontendLinks[$langCode] = Url::toRoute(["/{$moduleUid}/main/view" //?? no such route at frontend
+            //  , 'id' => $model->id, 'lang' => $langCode], true);
+            $frontendLinks[$langCode] = '';
+            if ($model->hasInvisibleParent()) {
+                if (empty($model->route)) {
+                    $frontendLinks[$langCode] = Url::toRoute(["/{$moduleUid}/main/show", 'id' => $model->id, 'slug' => $model->slug]);
+                } else {  // external/internal link
+                    $frontendLinks[$langCode] = ContentMenuBuilder::routeToLink($model->route);
+                }
+            }
+        }
+        if (!empty($appModel)) $appModel::restoreApplication();
+
+        return $this->render('view', compact('model', 'modelsI18n', 'frontendLinks'));
     }
 
     /**
@@ -160,9 +192,7 @@ class AdminController extends BaseAdminMulangController
                 ]);
             }
         } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+            return $this->render('create', compact('model'));
         }
     }
 
@@ -213,11 +243,7 @@ class AdminController extends BaseAdminMulangController
                 ]);
             }
         } else {
-// after $model->save() was cleared static cache $model::$_i18n and loaded data lost for this model
-//$model->load($post); // repeat once more
-            return $this->render('update', [
-                'model' => $model,
-            ]);
+            return $this->render('update', compact('model'));
         }
     }
 
@@ -270,10 +296,7 @@ class AdminController extends BaseAdminMulangController
     public function actionShowTree($active = 0)
     {
         $model = $this->module->model('Content');
-        return $this->renderPartial('show-tree', [
-            'model'  => $model,
-            'active' => $active,
-        ]);
+        return $this->renderPartial('show-tree', compact('model', 'active'));
     }
 
     public function actionShift($direction, $id)
@@ -332,6 +355,45 @@ class AdminController extends BaseAdminMulangController
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
         }
+    }
+
+    /**
+     * Resolve route-string from $post['route']
+     */
+    public function actionCheckRoute()
+    {
+        $post = Yii::$app->request->post();
+        if (empty($post['route'])) {
+            $result = Yii::t($this->tcModule, 'Error in POST-ed data');
+        } else {
+            $ctrlLinkPrefix = empty($post['ctrlLinkPrefix']) ? null : $post['ctrlLinkPrefix'];
+
+            $url = ContentMenuBuilder::routeToLink($post['route'], $ctrlLinkPrefix);
+
+            if (Yii::$app instanceof UniApplication && Yii::$app->type == UniApplication::APP_TYPE_BACKEND) {
+                // backend application don't have frontend-routes, $url is wrong
+                $url = false;
+
+                // if module-container (system-module) has ApplicationModel - it can get frontend application with correct routes
+                $containerModule = $this->module->module;
+                if ($containerModule instanceof UniModule && array_key_exists(static::$sysAppModel, $containerModule->models)) {
+                    $appModel = $containerModule::model(static::$sysAppModel);
+                    $appFront = $appModel::initFrontendApplication();
+                    $url = ContentMenuBuilder::routeToLink($post['route'], $ctrlLinkPrefix);
+                    $appModel::restoreApplication();
+                }
+            }
+
+            if ($url) {
+                $result = htmlspecialchars($url);
+            } else {
+                $result = Yii::t($this->tcModule, "Can't resolve route '{route}'", ['route' => $post['route']]);
+                if (!empty(ContentMenuBuilder::$errorRouteConvert)) {
+                    $result .= ', ERROR: ' . ContentMenuBuilder::$errorRouteConvert;
+                }
+            }
+        }
+        return $result;
     }
 
 }

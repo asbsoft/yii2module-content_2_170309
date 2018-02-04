@@ -1,11 +1,13 @@
 <?php
-/* @var $this yii\web\View */
-/* @var $model asb\yii2\modules\content_2_170309\models\Content */
-/* @var $modelsI18n array of asb\yii2\modules\content_2_170309\models\ContentI18n */
-/* @var $page integer */
+    /* @var $this yii\web\View */
+    /* @var $model asb\yii2\modules\content_2_170309\models\Content */
+    /* @var $modelsI18n array of asb\yii2\modules\content_2_170309\models\ContentI18n */
+    /* @var $page integer */
+    /* @var $frontendLinks array of string */
 
     use asb\yii2\modules\content_2_170309\models\Content;
     use asb\yii2\modules\content_2_170309\models\ContentSearch;
+    use asb\yii2\modules\content_2_170309\models\ContentMenuBuilder;
 
     use asb\yii2\common_2_170212\assets\FlagAsset;
     use yii\bootstrap\BootstrapAsset;
@@ -101,13 +103,28 @@
                                 }
                                 if (!$model->is_visible) {
                                     echo Yii::t($tc, 'Content invisible at frontend');
-                                } else if (empty($model->i18n[$langCode]->text)) {
+                                } elseif (empty($model->i18n[$langCode]->text) && empty($model->route)) {
                                     echo Yii::t($tc, 'No content to show');
-                                } else if ($model->hasInvisibleParent()) {
-                                    echo Yii::t($tc, 'For use as text block only because has invisible parent node');
+                                } elseif ($model->hasInvisibleParent()) {
+                                    if (empty($model->i18n[$langCode]->title)) {
+                                        echo Yii::t($tc, 'For use as text block only because has invisible parent node and empty title');
+                                    } else {
+                                        if (!empty($model->route)) {  // external/internal link
+                                            //$link = ContentMenuBuilder::routeToLink($model->route);
+                                            //echo Html::a(htmlspecialchars($link), $link, ['target' => '_blank']);                                    
+                                              echo Html::a(htmlspecialchars($frontendLinks[$langCode]), $frontendLinks[$langCode], ['target' => '_blank']);
+                                        } else {
+                                            //$link = Url::toRoute(['main/show', 'id' => $model->id, 'slug' => $model->slug]);
+                                            echo Yii::t($tc, 'For use as text block or submenu page because has invisible parent node.')
+                                                 . '<br />' . Yii::t($tc, 'Link for submenu') . ': '
+                                               //. Html::a($link, $link, ['target' => '_blank']);
+                                                 . Html::a($frontendLinks[$langCode], $frontendLinks[$langCode], ['target' => '_blank']);
+                                        }
+                                    }
                                 } else {
-                                    $link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);
-                                    echo Html::a($link, $link, ['target' => '_blank']);
+                                  //$link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);//?? no such route
+                                  //echo Html::a($link, $link, ['target' => '_blank']);
+                                    echo Html::a($frontendLinks[$langCode], $frontendLinks[$langCode], ['target' => '_blank']);
                                 }
                             }
                         ?>

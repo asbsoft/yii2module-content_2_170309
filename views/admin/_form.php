@@ -11,6 +11,7 @@
     use asb\yii2\common_2_170212\widgets\ckeditor\CkEditorWidget;
 
     use yii\helpers\Html;
+    use yii\helpers\Url;
     use yii\widgets\ActiveForm;
     use yii\bootstrap\Modal;
 
@@ -23,7 +24,16 @@
     $routeHintText = Yii::t($tc, "Enter internal link here in format '/path/to/content' (without language prefix)")
                    . Yii::t($tc, " or external link with leading '=', for example: '= https://google.com'");
 
+    $moduleUid = $this->context->module->uniqueId;
+
     // defaults
+    $idRouteField = 'link-route';
+    $idCheckRouteButton = 'check-route';
+    $idShowInstruction = 'show-instruction';
+    $idSubmitButton = 'save-no-view';
+    $urlCheckRoute = Url::toRoute("/{$moduleUid}/admin/check-route");
+    $ctrlLinkPrefix = Url::toRoute("/{$this->context->uniqueId}");
+    
     if (empty($heightEditor)) $heightEditor = 240; //px
 
     if (empty($activeTab)) {
@@ -125,8 +135,16 @@
         <br style="clear:both" />
 
         <div class="col-md-10">
-            <?= $form->field($model, 'route')->textInput(['maxlength' => true])
-                ->hint(Yii::t($tc, $routeHintText)) ?>
+            <?= $form->field($model, 'route')->textInput([
+                    'id' => $idRouteField,
+                    'maxlength' => true,
+                ])->hint(Yii::t($tc, $routeHintText)) ?>
+        </div>
+        <div class="col-md-1 media-middle">
+            <?= Html::submitButton(Yii::t($tc, 'Check route'), [
+                   'id' => $idCheckRouteButton,
+                   'class' => 'btn',
+                ]) ?>
         </div>
 
         <br style="clear:both" />
@@ -196,7 +214,7 @@
                     'class' => $model->isNewRecord ? 'btn btn-success' : 'btn btn-primary'
                 ]) ?>
             <?= Html::submitButton(Yii::t($tc, 'Save no view'), [
-                   'id' => 'save-no-view',
+                   'id' => $idSubmitButton,
                    'class' => 'btn btn-success',
                 ]) ?>
             <?= $form->field($model, 'aftersave', [
@@ -220,12 +238,28 @@
 
 <?php
     $aftersave_list = $model::AFTERSAVE_LIST;
+    $msgLoading = Yii::t($tc, 'loading...');
     $this->registerJs("
-        jQuery('#save-no-view').bind('click', function() {
+        jQuery('#{$idSubmitButton}').bind('click', function() {
             jQuery('#aftersave').val('{$aftersave_list}');
         });
-        jQuery('#show-instruction').bind('click', function() {
+        jQuery('#{$idShowInstruction}').bind('click', function() {
             jQuery('#instruction-window').modal('show');
+        });
+        jQuery('#{$idCheckRouteButton}').bind('click', function() {
+            var route = jQuery('#{$idRouteField}').val();
+            var idHint = '#{$idRouteField} + div.hint-block';
+            var oldText = jQuery(idHint).text();
+            jQuery(idHint).text('$msgLoading');
+            jQuery(idHint).load('{$urlCheckRoute}', {
+                'route': route,
+                'ctrlLinkPrefix': '{$ctrlLinkPrefix}'
+            }, function() {
+                setTimeout(function(){
+                    jQuery(idHint).text(oldText);
+                }, 10000);
+            });
+            return false;
         });
     ");
 ?>

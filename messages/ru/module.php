@@ -70,7 +70,18 @@ return array_merge($instruction, [
     'No content to show'=> 'Нет контента для отображения',
     'For use as text block only because has invisible parent node'
                         => 'Для использования только в виде текстового блока, так как имеет невидимый родительский узел',
+    'For use as text block only because has invisible parent node and empty title'
+ => 'Для использования только в виде текстового блока, так как имеет невидимый родительский узел и пустой заголовок',
+    'For use as text block or submenu page because has invisible parent node.'
+ => 'Для использования в виде текстового блока или страницы подменю, так как имеет невидимый родительский узел',
+    'Link for submenu'  => 'Линк для подменю',
     '(no title)'        => '(без заголовка)',
+    'Check route'       => 'Проверить роут',
+    'loading...'        => 'загружается...',
+    'Error in POST-ed data'
+                        => 'Ошибка в POST-данных',
+    "Can't resolve route '{route}'"
+                        => "Невозможно обработать роут '{route}'",
 
 // models
     'ID'                => 'Ид',
