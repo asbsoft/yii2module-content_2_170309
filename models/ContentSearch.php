@@ -41,8 +41,7 @@ class ContentSearch extends Content
      * @return ActiveDataProvider
      */
     public function search($params)
-    {//echo __METHOD__;var_dump($params);
-
+    {
         $contentClassname = $this->module->model('Content')->className();
         $query = $this->module->model('ContentQuery', [$contentClassname]);
 
@@ -50,10 +49,9 @@ class ContentSearch extends Content
             'query' => $query,
         ]);
 
-        $this->load($params);//var_dump($this->attributes);
-        if ($this->parent_id == '-') $this->parent_id = ''; // means search in all tree
+        $this->load($params);
 
-        if (!$this->validate()) {//var_dump($this->errors);
+        if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
@@ -62,7 +60,7 @@ class ContentSearch extends Content
         $query->andFilterWhere([
             'main.id' => $this->id, // ambiguous: 'id' => $this->id,
             'owner_id' => $this->owner_id,
-            'parent_id' => $this->parent_id,
+            'parent_id' => $params['parent'] === '-' ? null : $this->parent_id,
             'is_visible' => $this->is_visible,
             //'create_time' => $this->create_time,
             //'update_time' => $this->update_time,
@@ -70,20 +68,28 @@ class ContentSearch extends Content
 
         $langHelper = $this->module->langHelper;
         $langCodeMain = $langHelper::normalizeLangCode(Yii::$app->language);
-/*
-        $i18nTable = $this->module->model('ContentI18n')->tableName();
-        $query->alias('main')->leftJoin(['i18n' => $i18nTable]
-            , "main.id = i18n.content_id AND i18n.lang_code = '{$langCodeMain}'");
-*/
+
         $query->andFilterWhere(['like', 'slug', $this->slug]);
         $query->andFilterWhere(['like', 'title', $this->title]);
-        //$query->andFilterWhere(['like', 'text', $this->text]);
+      //$query->andFilterWhere(['like', 'text', $this->text]);
 
         if (empty($params['sort'])) {
             $query->orderBy($this::$defaultOrderBy);
+        } elseif ($params['parent'] === '-') {
+            $query->orderBy(['slug' => SORT_ASC]);
         }
             
-        //list($sql, $sqlParams) = Yii::$app->db->getQueryBuilder()->build($query);var_dump($sql);var_dump($sqlParams);exit;
+        //list($sql, $sqlParams) = Yii::$app->db->getQueryBuilder()->build($query);var_dump($sql);var_dump($sqlParams);//exit;
         return $dataProvider;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function formName()
+    {
+      //return parent::formName(); // return 'ContentSearch'
+        return 'q'; // to optimize GET-query
+    }
+
 }

@@ -20,19 +20,18 @@
         'class' => 'alert-link text-primary',
     ];
 
-    //var_dump($active);
-    $optionsAll = $active == '-' ? $linkOptionsMarked : $linkOptions;
+    $optionsAll = $active === '-' ? $linkOptionsMarked : $linkOptions;
     $optionsRoot = $active == '0' ? $linkOptionsMarked : $linkOptions;
 
-    //$list = $model::nodesTreeList($parentId = 0, $level = 0, $shiftPrefix = '.&nbsp;&nbsp;');//var_dump($list);
-    $list = $model::nodesTree($parentId = 0, $level = 0, $shiftPrefix = '.&nbsp;&nbsp;');//var_dump($list);
+    //$list = $model::nodesTreeList($parentId = 0, $level = 0, $shiftPrefix = '.&nbsp;&nbsp;');
+    $list = $model::nodesTree($parentId = 0, $level = 0, $shiftPrefix = '.&nbsp;&nbsp;');
 
 ?>
 <div class="content-tree">
     <?php if (empty($list)): ?>
         <div class="content-tree-empty"><?= Yii::t($tc, 'Tree is empty') ?></div>
     <?php else: ?>
-        <div class="content-tree-link <?= $active == '-' ? $markoutClass : '' ?>">
+        <div class="content-tree-link <?= $active === '-' ? $markoutClass : '' ?>">
             <?= Html::a(Yii::t($tc, 'All nodes'), Url::to(['index', 'parent' => '-']), $optionsAll); ?>
         </div>
         <div class="content-tree-link <?= $active == '0' ? $markoutClass : '' ?>">

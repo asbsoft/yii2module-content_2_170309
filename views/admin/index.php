@@ -3,6 +3,7 @@
     /* @var $this yii\web\View */
     /* @var $searchModel asb\yii2\modules\content_2_170309\models\ContentSearch */
     /* @var $dataProvider yii\data\ActiveDataProvider */
+    /* @var $params array */
 
     use asb\yii2\modules\content_2_170309\models\Formatter;
 
@@ -24,23 +25,23 @@
 
     $tc = $this->context->tcModule;
 
-    $params = Yii::$app->request->queryParams;//var_dump($params);
-    $formName = basename($searchModel::className());
+//$formName = basename($searchModel::className());
+    $formName = $searchModel->formName();
 
     $currentId = empty($params['id']) ? 0 : $params['id'];
-    $parentId = isset($params['parent']) ? $params['parent'] : '-';//var_dump($parentId);
+    $parentId = isset($params['parent']) ? $params['parent'] : 0;
     if (empty($parentId) || $parentId == '-') {
         $parentModel = null;
     } else {
         $parentModel = $searchModel::findOne($parentId);
     }
 
-    $paramSort = Yii::$app->request->get('sort', '');//var_dump($paramSort);
+    $paramSort = Yii::$app->request->get('sort', '');
     if ($parentId != '-' && (empty($paramSort) || 'prio' == $paramSort)) { //!! && empty($params[$formName][...])
         $actionColumnTemplate = '{change-visible} {view} {update} {shift-down} {shift-up}';
     } else {
         $actionColumnTemplate = '{change-visible} {view} {update}';
-    }//var_dump($actionColumnTemplate);
+    }
     if (Yii::$app->user->can('roleContentModerator')) {
         $actionColumnTemplate .= ' {delete}';
     }
@@ -93,7 +94,7 @@
     <div class="col-md-8">
         <div class="col-xs-6">
             <h4>
-                <?php if ($parentId == '-'): ?>
+                <?php if ($parentId === '-'): ?>
                     <?= Yii::t($tc, 'All nodes') ?>
                 <?php elseif ($parentId == 0): ?>
                     [<?= Yii::t($tc, 'root') ?>]
@@ -168,7 +169,8 @@
             'id' => $gridId,
             'dataProvider' => $dataProvider,
             'filterModel' => $searchModel,
-            'filterUrl' => Url::to(['index', 'parent' => '-']), // search in all tree
+          //'filterUrl' => Url::to(['index', 'parent' => '-']), // search in all tree only
+            'filterUrl' => Url::to(['index', 'parent' => $parentId]), // search in current subtree
             'options' => [
                 'class' => $gridHtmlClass,
             ],
@@ -217,11 +219,8 @@
                     'filter' => $userFilter,
                     'filterInputOptions' => ['class' => 'form-control', 'prompt' => '-' . Yii::t($tc, 'all') . '-'],
                 ],
-
-                
                 // 'create_time',
                 // 'update_time',
-
                 [
                     'attribute' => 'id',
                     'options' => ['class' => 'col-md-1'],
@@ -231,7 +230,6 @@
                         'class' => 'form-control align-center',
                     ],
                 ],
-
                 [ 
                     'class' => ButtonedActionColumn::className(),//'class' => 'yii\grid\ActionColumn',
                     'header' => Yii::t($tc, 'Actions'),

@@ -76,26 +76,28 @@ class AdminController extends BaseAdminMulangController
             ],
         ]);
         
-        $behaviors['access']['rules'] = $rules; //!! rewrite
+        $behaviors['access']['rules'] = $rules; // rewrite access rules, do not merge with parent
         return $behaviors;
     }
 
     /**
      * Lists all Content models.
+     * @param mixed $parent parent node id, '0' means show root children, '-' means show all nodes.
+     * @param integer $page
      * @return mixed
      */
-    public function actionIndex($parent = '-', $page = 1)
+    public function actionIndex($parent = null, $page = 1)
     {
         $searchModel = $this->module->model('ContentSearch');
 
         // list filter parameters correction
         $params = Yii::$app->request->queryParams;
-        if (empty($parent) && !empty($params[$searchModel->formName()]['parent_id'])) {
-            $parent = $params[$searchModel->formName()]['parent_id'];
+        if ($parent === '-') { // to show all nodes
+            $params['parent'] = $parent;
+            unset($params[$searchModel->formName()]['parent_id']);
         } else {
-            $params[$searchModel->formName()]['parent_id'] = $parent;
+            $params[$searchModel->formName()]['parent_id'] = $params['parent'] = intval($parent);
         }
-        //if ($parent == '-') $parent = $params[$searchModel->formName()]['parent_id'] = null;
 
         if (!Yii::$app->user->can('roleContentModerator') && Yii::$app->user->can('roleContentAuthor')) {
             $params[$searchModel->formName()]['owner_id'] = Yii::$app->user->id;
@@ -115,7 +117,7 @@ class AdminController extends BaseAdminMulangController
             $pager->page = $page - 1; //! from 0
         }
 
-        return $this->render('index', compact('dataProvider', 'searchModel'));
+        return $this->render('index', compact('dataProvider', 'searchModel', 'params'));
     }
 
     /**
