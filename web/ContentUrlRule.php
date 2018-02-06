@@ -17,10 +17,12 @@ class ContentUrlRule extends YiiWebUrlRule implements UniUrlRuleInterface
     /**
      * @inheritdoc
      */
-    public function showRouteInfo()
+    public function showRouteInfo($showPattern = false)
     {
         $result = ''
-            . "'{$this->pattern}' => '{$this->route}'"
+            . "'{$this->name}'"
+            . ($showPattern ? " ({$this->pattern})" : '')
+            . " => '{$this->route}'"
             . ", contentId = '{$this->contentId}'\n"
             ;
         return $result;
