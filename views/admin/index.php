@@ -37,7 +37,7 @@
     }
 
     $paramSort = Yii::$app->request->get('sort', '');
-    if ($parentId != '-' && (empty($paramSort) || 'prio' == $paramSort)) { //!! && empty($params[$formName][...])
+    if ($parentId !== '-' && (empty($paramSort) || 'prio' == $paramSort)) { //!! && empty($params[$formName][...])
         $actionColumnTemplate = '{change-visible} {view} {update} {shift-down} {shift-up}';
     } else {
         $actionColumnTemplate = '{change-visible} {view} {update}';
