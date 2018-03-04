@@ -3,6 +3,9 @@
 use asb\yii2\modules\content_2_170309\models\ContentBase;
 use asb\yii2\modules\content_2_170309\models\ContentI18n;
 
+use asb\yii2\common_2_170212\behaviors\ParamsAccessBehaviour;
+
+
 $filesSubpath = 'content';
 
 return [
@@ -18,6 +21,18 @@ return [
     'filesSubpath'        => $filesSubpath,
     'uploadsContentDir'   => "@uploadspath/{$filesSubpath}",
     'uploadsContentUrl'   => "@webfilesurl/{$filesSubpath}",
+
+    'behaviors' => [
+        'params-access' => [
+            'class' => ParamsAccessBehaviour::className(),
+            'defaultRole' => 'roleAdmin',
+            'readonlyParams' => [
+                 'filesSubpath',
+                 'uploadsContentDir',
+                 'uploadsContentUrl',
+            ],
+        ],
+    ],
 
     // Maximum image size in bytes
     'maxImageSize' => 102400,
