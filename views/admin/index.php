@@ -25,7 +25,6 @@
 
     $tc = $this->context->tcModule;
 
-//$formName = basename($searchModel::className());
     $formName = $searchModel->formName();
 
     $currentId = empty($params['id']) ? 0 : $params['id'];
