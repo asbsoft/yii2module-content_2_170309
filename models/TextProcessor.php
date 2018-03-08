@@ -25,7 +25,7 @@ class TextProcessor
      * @return string
      */
     public static function textPreprocess($text, $params)
-    {//echo __METHOD__;var_dump($params);//var_dump($text);
+    {
         // translate '{{PARAM}}'
         $trtab = [];
         if (is_array($params)) {
@@ -36,41 +36,41 @@ class TextProcessor
         }
 
         // find and process in text '{{%plugin ...params...}}'
-        $text = preg_replace_callback('/{{%([^}]+)}}/', 'static::runPlugin', $text);//var_dump($text);
+        $text = preg_replace_callback('/{{%([^}]+)}}/', 'static::runPlugin', $text);
         
         // erase other '{{...}}'
-        $text = preg_replace('/{{[^}]*}}/', '', $text);//var_dump($text);
+        $text = preg_replace('/{{[^}]*}}/', '', $text);
         return $text;
     }
 
     protected static function runPlugin($matches)
-    {//echo __METHOD__;var_dump($matches);
+    {
          $origText = $matches[0];
          $cmd = $matches[1];
-         $cmd = html_entity_decode($cmd, ENT_QUOTES);//echo'cmd:';var_dump($cmd);
+         $cmd = html_entity_decode($cmd, ENT_QUOTES);
 
          $parts = explode(' ', $cmd, 2);
          $plugin = trim($parts[0]);
-         $rest = empty($parts[1]) ? '' : trim($parts[1]);//echo"plugin='$plugin', rest='$rest'<br>";
+         $rest = empty($parts[1]) ? '' : trim($parts[1]);
 
-         $parts = explode(',', $rest);//echo'parts:';var_dump($parts);
+         $parts = explode(',', $rest);
          $params = [];
          foreach ($parts as $next) {
              $next = trim($next);
              if (empty($next)) continue;
 
-             if (preg_match('/([^=]+)=?(.*)/', $next, $found)) {//var_dump($found);
+             if (preg_match('/([^=]+)=?(.*)/', $next, $found)) {
                  $name = trim($found[1]);
                  $val = trim($found[2]);
                  $val = trim($val, "'");
-                 $val = trim($val, '"');//echo "'{$name}'=>'$val'<br>";
+                 $val = trim($val, '"');
                  if (empty($val)) {
                      $params[] = $name;
                  } else {
                      $params[$name] = $val;
                  }
              }
-         }//echo"plugin='$plugin'";var_dump($params);
+         }
 
          $result = $origText;
          $pluginMethod = "plugin{$plugin}";
@@ -90,7 +90,7 @@ class TextProcessor
      * @return string result text or '' on any error
      */
     protected static function pluginUrl($params)
-    {//echo __METHOD__;var_dump($params);
+    {
         $result = '';
         if (!empty($params['route'])) {
             $route = $params['route'];
@@ -114,11 +114,11 @@ class TextProcessor
      * @return string result string or '' on any error
      */
     protected static function pluginRender($params)
-    {//echo __METHOD__;var_dump($params);
+    {
         $result = '';
         if (!empty($params['action'])) {
             $actionUid = $params['action'];
-            unset($params['action']);//echo"runAction($actionUid):";var_dump($params);
+            unset($params['action']);
             try {
                 $result = Yii::$app->runAction($actionUid, $params);
             } catch (InvalidRouteException $ex) {
@@ -133,7 +133,7 @@ class TextProcessor
             unset($params['widget']);
             if (isset(static::$widgets[$name])) {
                 $widgetParams = $params;
-                $widgetParams['class'] = static::$widgets[$name];//echo'widgetParams:';var_dump($widgetParams);
+                $widgetParams['class'] = static::$widgets[$name];
                 $widget = Yii::createObject($widgetParams);
                 $result = $widget->run();
             } else {

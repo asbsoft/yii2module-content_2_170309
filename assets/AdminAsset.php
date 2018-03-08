@@ -21,7 +21,8 @@ class AdminAsset extends AssetBundle
         'yii\bootstrap\BootstrapAsset', // add only CSS - need to move up 'bootstrap.css' in <head>s of render HTML-results
     ];
 
-    public function init() {
+    public function init()
+    {
         parent::init();
         $this->sourcePath = __DIR__ . '/admin';
     }

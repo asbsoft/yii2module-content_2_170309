@@ -79,7 +79,7 @@ class ContentSearch extends Content
             $query->orderBy(['slug' => SORT_ASC]);
         }
             
-        //list($sql, $sqlParams) = Yii::$app->db->getQueryBuilder()->build($query);var_dump($sql);var_dump($sqlParams);//exit;
+        //list($sql, $sqlParams) = Yii::$app->db->getQueryBuilder()->build($query);var_dump($sql);var_dump($sqlParams);
         return $dataProvider;
     }
 

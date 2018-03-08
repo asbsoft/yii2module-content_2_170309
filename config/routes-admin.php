@@ -1,8 +1,5 @@
 <?php
 
-$mgr = Yii::$app->urlManager;
-$normalizeTrailingSlash = !empty($mgr->normalizer->normalizeTrailingSlash) && $mgr->normalizer->normalizeTrailingSlash;//var_dump($normalizeTrailingSlash);
-
 // route without prefix => controller/action without current (and parent) module(s) IDs
 $result = [
     '<action:(view|update|delete|change-visible)>/<id:\d+>' => 'admin/<action>',
@@ -25,10 +22,12 @@ $result = [
   //'?'                                                     => 'admin/index', //!! no '' - never start routes from root
 ];
 
+$mgr = Yii::$app->urlManager;
+$normalizeTrailingSlash = !empty($mgr->normalizer->normalizeTrailingSlash) && $mgr->normalizer->normalizeTrailingSlash;
 if ($normalizeTrailingSlash) {
     $result[''] = 'admin/index';
 } else {
     $result['?'] = 'admin/index';
-}//var_dump($result);exit;
+}
 
 return $result;

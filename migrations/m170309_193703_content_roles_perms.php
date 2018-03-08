@@ -4,10 +4,6 @@ use asb\yii2\modules\content_2_170309\rbac\IsContentOwnerRule;
 
 use yii\db\Migration;
 
-// if problems with autoload (classes not found):
-//Yii::setAlias('@asb/yii2', dirname(dirname(dirname(__DIR__))) . '/yii2-common_2_170212');
-//Yii::setAlias('@asb/yii2/modules/content_2_170309', dirname(__DIR__));//var_dump(Yii::$aliases);exit;
-
 /**
  * @author Alexandr Belogolovsky <ab2014box@gmail.com>
  */

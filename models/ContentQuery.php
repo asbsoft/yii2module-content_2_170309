@@ -36,7 +36,7 @@ class ContentQuery extends ActiveQuery
 /*?? error on run by codeception
             $module = Module::getModuleByClassname(Module::className()); //?? return NULL in func tests
             //$module = Module::getModuleByClassname(Module::className(), true); // load anonimous follow translations problem
-            if (empty($module)) {//var_dump(array_keys(Yii::$app->modules));var_dump(array_keys(Yii::$app->loadedModules));
+            if (empty($module)) {
                 throw new InvalidConfigException("Can't load content module " . Module::className());
             }
             $langHelper = $module->langHelper;
@@ -79,7 +79,7 @@ class ContentQuery extends ActiveQuery
                 "{$this->tableAliasMain}.*",
                 "{$this->tableAliasI18n}.title AS title",
                 "{$this->tableAliasI18n}.text AS text",
-            ]);//list ($sql, $parms) = Yii::$app->db->getQueryBuilder()->build($this);var_dump($sql);var_dump($parms);exit;
+            ]);
         return parent::all($db);
     }
 
@@ -88,7 +88,7 @@ class ContentQuery extends ActiveQuery
      * @return Content|array|null
      */
     public function one($db = null)
-    {//echo __METHOD__;var_dump($this->langCodeMain);var_dump($this->where);
+    {
         if (isset($this->where['id'])) {
             $this->where["{$this->tableAliasMain}.id"] = $this->where['id'];
             unset($this->where['id']);
@@ -104,7 +104,7 @@ class ContentQuery extends ActiveQuery
                 "{$this->tableAliasMain}.*",
                 "{$this->tableAliasI18n}.title AS title",
                 "{$this->tableAliasI18n}.text AS text",
-            ]);//list ($sql, $parms) = Yii::$app->db->getQueryBuilder()->build($this);var_dump($sql);var_dump($parms);exit;
+            ]);
         return parent::one($db);
     }
 
@@ -114,7 +114,7 @@ class ContentQuery extends ActiveQuery
      * @since Yii2.0.11
      */
     public function andWhere($condition, $params = [])
-    {//echo __METHOD__;var_dump($condition);//var_dump($params);
+    {
         $mc = $this->modelClass;
         $tableName = $mc::tableName();
 
@@ -130,7 +130,7 @@ class ContentQuery extends ActiveQuery
             } else {
                 $newCondition[$key] = $value;
             }
-        }//echo'FIXED:';var_dump($newCondition);
+        }
         return parent::andWhere($newCondition, $params);
     }
 

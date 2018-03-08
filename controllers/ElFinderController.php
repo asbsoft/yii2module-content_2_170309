@@ -19,18 +19,6 @@ class ElFinderController extends BaseController
     /** Default role(s) for all actions. Use instead of behaviors()['access'] */
     public $access = ['roleContentAuthor', 'roleContentModerator'];
 
-    /** Allow to upload files mime types */
-    //public $uploadAllow = ['image']; // default in parent
-
-    /**
-     * Display files filter parameter for elFinder.
-     * @example
-     *   ['image'] - display all images
-     *   ['image/png', 'application/x-shockwave-flash'] - display png and flash
-     */
-    //public $onlyMimes = ['image']; // default in elFinder
-    //public $onlyMimes = ['all']; // show all
-
     /**
      * @inheritdoc
      * Need to add news id to connector's URL. Every news will have it's own uploads dir.
@@ -48,7 +36,7 @@ class ElFinderController extends BaseController
      */
     public function __construct($id, $module, $config = [])
     {
-        $contentId = Yii::$app->request->getQueryParam('id', 0);//var_dump($contentId);
+        $contentId = Yii::$app->request->getQueryParam('id', 0);
         $newsModel = $module::model('Content');
         $subdir = $newsModel::getImageSubdir($contentId);
         

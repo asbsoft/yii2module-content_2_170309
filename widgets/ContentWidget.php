@@ -24,8 +24,7 @@ class ContentWidget extends Widget
      * @inheritdoc
      */
     public function run()
-    {//echo __METHOD__;var_dump($this->params);exit;
-
+    {
         $module = Module::getModuleByClassname(Module::className());
         if (empty($module)) {
             $msg = "Can't load own module in " . __METHOD__;
