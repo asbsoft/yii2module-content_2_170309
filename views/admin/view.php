@@ -123,21 +123,21 @@
                                     }
                                 } else {
                                   //$link = Url::toRoute(['main/view', 'id' => $model->id, 'lang' => $langCode], true);//?? no such route
-                                  //echo Html::a($link, $link, ['target' => '_blank']);
-                                    echo Html::a($frontendLinks[$langCode], $frontendLinks[$langCode], ['target' => '_blank']);
+                                    $link = $frontendLinks[$langCode];
+                                    echo Html::a($link, $link, ['target' => '_blank']);
                                 }
                             }
                         ?>
                         </div>
                     </div>
                     <div class="h4 content-label">
-                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->title)): ?>
+                    <?php if (!empty($model->i18n[$langCode]->title)): ?>
                             <?= $model->i18n[$langCode]->title ?>
                     <?php else: ?>
                             <?= Yii::t($tc, '(no title)') ?>
                     <?php endif; ?>
                     </div>
-                    <?php if ($model->is_visible && !$moduleInfo && !empty($model->i18n[$langCode]->text)): ?>
+                    <?php if (!empty($model->i18n[$langCode]->text)): ?>
                         <div class="content-example">
                             <?php $savedTitle = $this->title; ?>
                             <?= Yii::$app->runAction("{$moduleUid}/main/view", [ // show as content page will display at frontend

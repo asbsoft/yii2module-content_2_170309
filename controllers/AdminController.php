@@ -149,9 +149,8 @@ class AdminController extends BaseAdminMulangController
             }
         }
         $moduleUid = $this->module->uniqueId;
+        $frontendLinks = [];
         foreach ($languages as $langCode => $lang) {
-            //$frontendLinks[$langCode] = Url::toRoute(["/{$moduleUid}/main/view" //?? no such route at frontend
-            //  , 'id' => $model->id, 'lang' => $langCode], true);
             $frontendLinks[$langCode] = '';
             if ($model->hasInvisibleParent()) {
                 if (empty($model->route)) {
@@ -159,6 +158,9 @@ class AdminController extends BaseAdminMulangController
                 } else {  // external/internal link
                     $frontendLinks[$langCode] = ContentMenuBuilder::routeToLink($model->route);
                 }
+            } else {
+                $frontendLinks[$langCode] = Url::toRoute(["/{$moduleUid}/main/view"
+                  , 'id' => $model->id, 'lang' => $langCode], true);
             }
         }
         if (!empty($appModel)) $appModel::restoreApplication();
